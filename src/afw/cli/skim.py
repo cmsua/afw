@@ -217,7 +217,7 @@ def merge_skims(config: AnalysisConfig, skim_dir: str) -> None:
 
 if __name__ == "__main__":
     # Setup Args
-    parser = utils.get_common_args("Skimmer")
+    parser = utils.get_common_args()
     parser.add_argument(
         "-p",
         "--parallel",
