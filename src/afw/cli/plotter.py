@@ -1,0 +1,66 @@
+import logging
+import os
+import pickle
+
+import utils
+from ..objects import ThingToPlot
+
+
+def save_results(
+    output_dir: str, extension: str, things: list[ThingToPlot], plots: dict
+) -> None:
+    # Actually plot
+    # Try running with joblib
+    try:
+        import joblib
+
+        joblib.Parallel(n_jobs=-2)(
+            joblib.delayed(thing.plot_histogram)(
+                plots[thing.title],
+                os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
+            )
+            for thing in things
+        )
+    except ImportError:
+        logger.warning("Joblib not found - plotting synchronously")
+
+        for thing in things:
+            thing.plot_histogram(
+                plots[thing.title],
+                os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
+            )
+
+
+if __name__ == "__main__":
+    # Setup Args
+    parser = utils.get_common_args()
+
+    # Intermediates
+    parser.add_argument(
+        "-o", "--output_dir", default="plots", help="Directory in which to save plots"
+    )
+    parser.add_argument(
+        "-e", "--extension", default="png", help="Format in which to save plots"
+    )
+
+    args = parser.parse_args()
+
+    # Setup Logging
+    utils.setup_logging(args.debug)
+
+    logger = logging.getLogger("Main")
+    logger.info("Loaded Program and Arguments")
+
+    # Get Dask Client
+    logger.info("Creating & Saving Plots")
+
+    # Run on channel(s)
+    for channel_name in args.channel:
+        channel_config = utils.get_config(channel_name)
+        output_dir = os.path.join(args.output_dir, channel_config.name)
+        with open(os.path.join(output_dir, "results.pkl"), "rb") as file:
+            results = pickle.load(file)
+
+        save_results(
+            output_dir, args.extension, channel_config.get_things_to_plot(), results
+        )
