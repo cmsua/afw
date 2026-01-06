@@ -99,10 +99,9 @@ def get_common_args():
     - fileset root for non-skimmed files
     - debug mode
     """
-    if os.path.exists(".env"):
-        import dotenv
+    import dotenv
 
-        dotenv.load_dotenv()
+    dotenv.load_dotenv()
 
     # Setup Args
     parser = argparse.ArgumentParser("Analysis FrameWork (UA)")
