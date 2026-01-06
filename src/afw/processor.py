@@ -1,7 +1,7 @@
 from coffea.processor import ProcessorABC
 from coffea.analysis_tools import Weights
 
-from configs.base import AnalysisConfig
+from .objects import AnalysisConfig
 
 import awkward as ak
 

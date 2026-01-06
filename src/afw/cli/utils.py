@@ -5,9 +5,7 @@ Utilities for CLI tools
 import argparse
 import logging
 import os
-import tempfile
 import importlib
-import shutil
 
 from dask.distributed import Client
 
