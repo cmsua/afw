@@ -39,14 +39,10 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-  "coffea>=2025.12.0",
-  "dotenv",
+  "coffea>=2025.11.0",
   "dask",
   "dask-jobqueue",
-  "distributed",
-  "pycurl",
-  "rucio",
-  "joblib"
+  "distributed"
 ]
 dynamic = ["version"]
 
@@ -59,7 +55,12 @@ dev = [
   "sphinx",
   "pydata-sphinx-theme",
 ]
-
+client = [
+  "dotenv",
+  "pycurl",
+  "rucio",
+  "joblib"
+]
 
 [tool.hatch]
 version.source = "vcs"
