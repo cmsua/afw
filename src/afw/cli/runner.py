@@ -101,7 +101,7 @@ if __name__ == "__main__":
     logger.info(f"Reading from skim dir {skim_dir}")
 
     # Get Dask Client
-    client = utils.create_dask_client(args.cluster_address, args.config)
+    client = utils.create_dask_client(args.cluster_address, [args.config])
     skim_dir_root = os.path.expanduser(args.skim_dir)
 
     try:
