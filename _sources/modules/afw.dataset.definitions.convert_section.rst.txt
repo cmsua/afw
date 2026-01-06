@@ -1,0 +1,6 @@
+afw.dataset.definitions.convert\_section
+========================================
+
+.. currentmodule:: afw.dataset.definitions
+
+.. autofunction:: convert_section

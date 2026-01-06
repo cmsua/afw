@@ -1,0 +1,42 @@
+afw.dataset
+===========
+
+.. automodule:: afw.dataset
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      print_summary
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   cached
+   definitions
+   local
+   skimmed
+

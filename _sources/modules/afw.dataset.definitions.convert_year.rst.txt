@@ -1,0 +1,6 @@
+afw.dataset.definitions.convert\_year
+=====================================
+
+.. currentmodule:: afw.dataset.definitions
+
+.. autofunction:: convert_year

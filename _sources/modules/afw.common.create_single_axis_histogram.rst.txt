@@ -1,0 +1,6 @@
+afw.common.create\_single\_axis\_histogram
+==========================================
+
+.. currentmodule:: afw.common
+
+.. autofunction:: create_single_axis_histogram

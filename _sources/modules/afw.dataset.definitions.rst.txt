@@ -1,0 +1,32 @@
+afw.dataset.definitions
+=======================
+
+.. automodule:: afw.dataset.definitions
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_definitions
+      convert_section
+      convert_year
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

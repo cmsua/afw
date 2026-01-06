@@ -1,0 +1,28 @@
+afw.common.EtaToPlot
+====================
+
+.. currentmodule:: afw.common
+
+.. autoclass:: EtaToPlot
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~EtaToPlot.__init__
+      ~EtaToPlot.create_histogram
+      ~EtaToPlot.fill_histogram
+      ~EtaToPlot.plot_histogram
+   
+   
+
+   
+   
+   

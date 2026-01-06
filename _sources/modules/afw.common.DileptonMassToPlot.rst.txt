@@ -1,0 +1,28 @@
+afw.common.DileptonMassToPlot
+=============================
+
+.. currentmodule:: afw.common
+
+.. autoclass:: DileptonMassToPlot
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DileptonMassToPlot.__init__
+      ~DileptonMassToPlot.create_histogram
+      ~DileptonMassToPlot.fill_histogram
+      ~DileptonMassToPlot.plot_histogram
+   
+   
+
+   
+   
+   

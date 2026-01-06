@@ -1,0 +1,6 @@
+afw.dataset.local.build\_datasets
+=================================
+
+.. currentmodule:: afw.dataset.local
+
+.. autofunction:: build_datasets

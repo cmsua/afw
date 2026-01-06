@@ -1,0 +1,6 @@
+afw.dataset.definitions.build\_definitions
+==========================================
+
+.. currentmodule:: afw.dataset.definitions
+
+.. autofunction:: build_definitions

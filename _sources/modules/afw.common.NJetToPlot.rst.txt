@@ -1,0 +1,28 @@
+afw.common.NJetToPlot
+=====================
+
+.. currentmodule:: afw.common
+
+.. autoclass:: NJetToPlot
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~NJetToPlot.__init__
+      ~NJetToPlot.create_histogram
+      ~NJetToPlot.fill_histogram
+      ~NJetToPlot.plot_histogram
+   
+   
+
+   
+   
+   

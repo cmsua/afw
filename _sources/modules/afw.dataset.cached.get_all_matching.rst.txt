@@ -1,0 +1,6 @@
+afw.dataset.cached.get\_all\_matching
+=====================================
+
+.. currentmodule:: afw.dataset.cached
+
+.. autofunction:: get_all_matching

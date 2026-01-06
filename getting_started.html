@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Getting Started &#8212; UA CMS Framework 0.0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'getting_started';</script>
+    <link rel="canonical" href="/afw/getting_started.html" />
+    <link rel="icon" href="_static/logo.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference Guide" href="api_reference.html" />
+    <link rel="prev" title="UA CMS Analysis Framework documentation" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="UA CMS Framework 0.0.1 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="UA CMS Framework 0.0.1 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api_reference.html">
+    API Reference Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api_reference.html">
+    API Reference Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Getting Started</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">#</a></h1>
+<section id="first-steps-setup">
+<h2>First Steps: Setup<a class="headerlink" href="#first-steps-setup" title="Link to this heading">#</a></h2>
+<p>The traditional CMS workflow can be broken into the following stages:</p>
+<ul class="simple">
+<li><p>Data Discovery, in which lists of root files are associated with given metadata values</p></li>
+<li><p>Object Definition, in which electrons, muons, jets, or other objects are filtered based on a given criteria</p></li>
+<li><p>Event Preselection, in which events are filtered based on a fairly loose set of criteria. These criteria are expected to remain fixed throughout the analysis</p></li>
+<li><p>Event Selection, in which events are further filtered with a far-stricter set of criterion</p></li>
+<li><p>Plotting, in which a series of histograms are created, filled with various data, and saved</p></li>
+</ul>
+<p>In this framework, the entire analysis can be represented in a single file, consisting of an instance of a class extending <code class="xref py py-class docutils literal notranslate"><span class="pre">configs.base.AnalysisConfig</span></code>. This is an abstract class, meant to represent any given analysis. It consists of the following methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__init__(name)</span></code> accepts one parameter, which is the name of the directory in which any results will be saved.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_dataset(xcache_host)</span></code> returns a dataset definition populated with a list of remote root files, using the given xcache host. By convention, the metadata provided should contain <code class="docutils literal notranslate"><span class="pre">shortName</span></code>, <code class="docutils literal notranslate"><span class="pre">isData</span></code>, and optionally <code class="docutils literal notranslate"><span class="pre">nevents</span></code> and <code class="docutils literal notranslate"><span class="pre">xsec</span></code>. More info may be found on the datasets page. #TODO</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">define_objects(events)</span></code> is the analysis’s object definition method. It is expected to return a version of the <code class="docutils literal notranslate"><span class="pre">events</span></code> parameter after redefining objects as-needed. This modification is presumed to be destructive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">preselect_objects(events)</span></code> is the first of two object selection functions. Given events with objects defined as per the above method, it is expected to return a version of the <code class="docutils literal notranslate"><span class="pre">events</span></code> parameter after event preselection. While intended to be a destructive operation, many preselection functions are non-destructive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_objects(events)</span></code> is the second object selection functions. Given events passing preselection and with objects defined as per the above methods, it is expected to return a version of the <code class="docutils literal notranslate"><span class="pre">events</span></code> parameter after event selection. While intended to be a destructive operation, many preselection functions are non-destructive.</p></li>
+</ul>
+<p>To promote code reuse as much as possible, the histogramming and plotting code has been abstracted. The <code class="xref py py-class docutils literal notranslate"><span class="pre">configs.base.ThingToPlot</span></code> class is the fundamental object in plotting, and consists of the following methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__init__(name)</span></code> creates the object. Though many subclasses require fewer or more parameters, the <code class="docutils literal notranslate"><span class="pre">name</span></code> parameter is both the key in which the histogram is saved in the output file as well as the title of the generated plot</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">create_histogram</span></code> is intended to create a <code class="xref py py-class docutils literal notranslate"><span class="pre">hist.Histogram</span></code> object with any given amount of axis, though it may return any object that can be pickled and reduced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fill_histogram(histogram,</span> <span class="pre">events,</span> <span class="pre">dataset,</span> <span class="pre">weights,</span> <span class="pre">**kwargs)</span></code> is designed to apply the data provided to the object created in <code class="docutils literal notranslate"><span class="pre">create_histogram</span></code>. This is presumed to be a destructive method on the histogram object, but non-destructive on events, dataset, weights, and other <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_histogram(histogram,</span> <span class="pre">output_file)</span></code> is designed to save a copy of the filled and reduced histogram generated above. Note that this is done in addition to a pickled version of the histogram object, making this function ideal for saving large (and recreatable) objects such as graphics.</p></li>
+</ul>
+<p>To interface with the plots being generated, the AnalysisConfig class contains two methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">augment_events(events)</span></code> is designed to create additional information that may be shared across several plots, such as the total number of events, or masks to be shared across multiple plots. The result of this function will be passed to <code class="docutils literal notranslate"><span class="pre">fill_histogram</span></code> as keyword arguments.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_things_to_plot</span></code> is expected to return a list of ThingToPlot objects.</p></li>
+</ul>
+</section>
+<section id="running-a-workflow">
+<h2>Running A Workflow<a class="headerlink" href="#running-a-workflow" title="Link to this heading">#</a></h2>
+<p>To run a configuration, it must first be added to the <code class="xref py py-class docutils literal notranslate"><span class="pre">utils</span></code> class’s <code class="docutils literal notranslate"><span class="pre">get_config</span></code> method, which will enable its use in command-line utilities.</p>
+<p>Then, the <code class="docutils literal notranslate"><span class="pre">main.py</span></code> file can be used to run your analysis. The following CLI parameters may be of interest:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-c,</span> <span class="pre">--channel</span></code> should be set to your analysis config.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-w,</span> <span class="pre">--max-files-per-category</span></code> may be used to limit the analysis to a set number of files. This <strong>will</strong> change <code class="docutils literal notranslate"><span class="pre">nevents</span></code> for MC files if the dataset utilities are used, but not reweight data files. As such, this should only be used with a <code class="xref py py-class docutils literal notranslate"><span class="pre">dask.distributed.LocalCluster</span></code> for validating Python code.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-s,</span> <span class="pre">--no-skim</span></code> should be set accordingly. While skims are not yet present, and as such, the processor will default to raw files, it is still best-practice to include this flag to avoid running on incomplete skims later-on.</p></li>
+</ul>
+<p>Once the workflow is completed, it may be necessary to regenerate plots, such as to change the rebinning options. The <code class="docutils literal notranslate"><span class="pre">plotter.py</span></code> file may be used in this case, which will rerun only the <code class="docutils literal notranslate"><span class="pre">plot_histogram</span></code> function for each <code class="docutils literal notranslate"><span class="pre">ThingToPlot</span></code>.</p>
+</section>
+<section id="skimming">
+<h2>Skimming<a class="headerlink" href="#skimming" title="Link to this heading">#</a></h2>
+<p>Adapting an AnalysisConfig for skimming is fairly straight-forward. The following modifications will need to be done:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">define_objects(events)</span></code> and <code class="docutils literal notranslate"><span class="pre">preselect_objects(events)</span></code> must be adapted in a way that allows them to work with <a class="reference external" href="https://dask-awkward.readthedocs.io/en/stable/api/generated/dask_awkward.Array.html#dask_awkward.Array" title="(in dask-awkward v2025.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dask_awkward.Array</span></code></a> objects instead of <code class="xref py py-class docutils literal notranslate"><span class="pre">awkward.Array</span></code> objects. This should be fairly straight-forward to implement.</p></li>
+<li><p>A new <code class="docutils literal notranslate"><span class="pre">minify(events)</span></code> function should be introduced to the configuration. This method is expected to trim unneeded branches from the events object.</p></li>
+</ul>
+<p>Then, the <code class="docutils literal notranslate"><span class="pre">skim.py</span></code> file may be used to create skims. Note that the skims are saved on the worker nodes - if the workers do not have access to the local filesystem, the skims will need to be saved to a shared filesystem such as EOS. <strong>This is currently non-functional.</strong></p>
+<p>Additionally, the skimming code supports making skims from a baseline skim. <strong>This is currently non-functional.</strong></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">UA CMS Analysis Framework documentation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="api_reference.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference Guide</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#first-steps-setup">First Steps: Setup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-a-workflow">Running A Workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skimming">Skimming</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/getting_started.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Nathan A Nguyen.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

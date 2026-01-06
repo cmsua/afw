@@ -1,0 +1,28 @@
+afw.common.PtToPlot
+===================
+
+.. currentmodule:: afw.common
+
+.. autoclass:: PtToPlot
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PtToPlot.__init__
+      ~PtToPlot.create_histogram
+      ~PtToPlot.fill_histogram
+      ~PtToPlot.plot_histogram
+   
+   
+
+   
+   
+   

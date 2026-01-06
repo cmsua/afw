@@ -1,0 +1,6 @@
+afw.common.stacked\_colors
+==========================
+
+.. currentmodule:: afw.common
+
+.. autofunction:: stacked_colors

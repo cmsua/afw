@@ -1,0 +1,6 @@
+afw.dataset.cached.persist\_to\_file
+====================================
+
+.. currentmodule:: afw.dataset.cached
+
+.. autofunction:: persist_to_file

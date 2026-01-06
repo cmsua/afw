@@ -1,0 +1,35 @@
+﻿afw
+===
+
+.. automodule:: afw
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   common
+   dataset
+   objects
+   processor
+

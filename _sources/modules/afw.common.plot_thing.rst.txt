@@ -1,0 +1,6 @@
+afw.common.plot\_thing
+======================
+
+.. currentmodule:: afw.common
+
+.. autofunction:: plot_thing

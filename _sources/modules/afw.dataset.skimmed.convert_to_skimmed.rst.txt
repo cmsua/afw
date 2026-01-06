@@ -1,0 +1,6 @@
+afw.dataset.skimmed.convert\_to\_skimmed
+========================================
+
+.. currentmodule:: afw.dataset.skimmed
+
+.. autofunction:: convert_to_skimmed

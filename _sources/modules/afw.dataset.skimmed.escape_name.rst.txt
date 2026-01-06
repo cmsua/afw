@@ -1,0 +1,6 @@
+afw.dataset.skimmed.escape\_name
+================================
+
+.. currentmodule:: afw.dataset.skimmed
+
+.. autofunction:: escape_name

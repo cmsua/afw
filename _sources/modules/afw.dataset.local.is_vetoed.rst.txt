@@ -1,0 +1,6 @@
+afw.dataset.local.is\_vetoed
+============================
+
+.. currentmodule:: afw.dataset.local
+
+.. autofunction:: is_vetoed

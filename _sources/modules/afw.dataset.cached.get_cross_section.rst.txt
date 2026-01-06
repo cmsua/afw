@@ -1,0 +1,6 @@
+afw.dataset.cached.get\_cross\_section
+======================================
+
+.. currentmodule:: afw.dataset.cached
+
+.. autofunction:: get_cross_section

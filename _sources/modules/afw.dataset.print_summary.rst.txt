@@ -1,0 +1,6 @@
+afw.dataset.print\_summary
+==========================
+
+.. currentmodule:: afw.dataset
+
+.. autofunction:: print_summary

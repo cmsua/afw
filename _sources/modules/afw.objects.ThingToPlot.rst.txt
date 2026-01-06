@@ -1,0 +1,28 @@
+afw.objects.ThingToPlot
+=======================
+
+.. currentmodule:: afw.objects
+
+.. autoclass:: ThingToPlot
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ThingToPlot.__init__
+      ~ThingToPlot.create_histogram
+      ~ThingToPlot.fill_histogram
+      ~ThingToPlot.plot_histogram
+   
+   
+
+   
+   
+   

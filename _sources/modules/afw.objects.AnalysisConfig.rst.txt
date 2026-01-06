@@ -1,0 +1,32 @@
+afw.objects.AnalysisConfig
+==========================
+
+.. currentmodule:: afw.objects
+
+.. autoclass:: AnalysisConfig
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~AnalysisConfig.__init__
+      ~AnalysisConfig.augment_events
+      ~AnalysisConfig.define_objects
+      ~AnalysisConfig.get_dataset
+      ~AnalysisConfig.get_things_to_plot
+      ~AnalysisConfig.minify
+      ~AnalysisConfig.preselect_events
+      ~AnalysisConfig.select_events
+   
+   
+
+   
+   
+   

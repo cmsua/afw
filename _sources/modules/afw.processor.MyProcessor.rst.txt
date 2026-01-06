@@ -1,0 +1,27 @@
+afw.processor.MyProcessor
+=========================
+
+.. currentmodule:: afw.processor
+
+.. autoclass:: MyProcessor
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MyProcessor.__init__
+      ~MyProcessor.postprocess
+      ~MyProcessor.process
+   
+   
+
+   
+   
+   

@@ -1,0 +1,44 @@
+afw.common
+==========
+
+.. automodule:: afw.common
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      create_single_axis_histogram
+      plot_thing
+      stacked_colors
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      DileptonMassToPlot
+      DiscriminantToPlot
+      EtaToPlot
+      NJetToPlot
+      PtToPlot
+   
+   
+
+   
+   
+   
+
+
+

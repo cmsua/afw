@@ -1,0 +1,6 @@
+afw.dataset.cached.run\_dasgoclient
+===================================
+
+.. currentmodule:: afw.dataset.cached
+
+.. autofunction:: run_dasgoclient

@@ -1,0 +1,28 @@
+afw.common.DiscriminantToPlot
+=============================
+
+.. currentmodule:: afw.common
+
+.. autoclass:: DiscriminantToPlot
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DiscriminantToPlot.__init__
+      ~DiscriminantToPlot.create_histogram
+      ~DiscriminantToPlot.fill_histogram
+      ~DiscriminantToPlot.plot_histogram
+   
+   
+
+   
+   
+   
