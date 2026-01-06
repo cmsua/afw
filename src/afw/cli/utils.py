@@ -61,18 +61,9 @@ def create_dask_client(cluster_address: str, upload: bool = True):
         client = Client(cluster_address)
 
     if upload:
-        # Upload Workers
-        logger.debug("Uploading folders to workers...")
-        with tempfile.TemporaryDirectory() as tmpdir:
-            for folder in ["configs"]:
-                shutil.make_archive(
-                    os.path.join(tmpdir, folder), "zip", base_dir=folder
-                )
-                client.upload_file(os.path.join(tmpdir, f"{folder}.zip"))
-
         # Upload Files
         logger.debug("Uploading files to workers...")
-        files = ["processor.py"]
+        files = [file for file in os.listdir() if file.endswith(".py")]
         for file in files:
             logger.debug(f"Uploading file {file}")
             client.upload_file(file)
