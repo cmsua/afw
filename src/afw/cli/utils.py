@@ -141,18 +141,18 @@ def get_common_args():
 
 
 # Get config from ee, emu, mumu, or common (common is only used for skimming)
-def get_configs(file_path: str, module_name: str = "config") -> list[AnalysisConfig]:
+def get_configs(file_path: str) -> list[AnalysisConfig]:
     """
     Returns an analysis config from a given name. The file will be imported as the given module name.
 
     Parameters:
         file_path (str): The path to a python module
-        module_name (str, default "config"): The name of the module this file should be imported as
 
     Returns:
         list[objects.AnalysisConfig]: All AnalysisConfigs in said module
     """
     # Code taken form importlib docs
+    module_name = os.path.basename(file_path).replace(".py", "")
     spec = importlib.util.spec_from_file_location("config", file_path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module
