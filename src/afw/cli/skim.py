@@ -238,7 +238,7 @@ if __name__ == "__main__":
     logger.info(f"Writing to skim dir {skim_dir}")
 
     # Get Dask Client
-    client = utils.create_dask_client(args.cluster_address)
+    client = utils.create_dask_client(args.cluster_address, args.config)
 
     try:
         # Run on channel(s)

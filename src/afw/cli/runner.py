@@ -8,9 +8,10 @@ import time
 from coffea.nanoevents import NanoAODSchema
 from coffea.processor import DaskExecutor, Runner
 
+from .. import dataset
+from ..objects import AnalysisConfig
 from ..processor import MyProcessor
 from . import plotter, utils
-from .objects import AnalysisConfig
 
 
 def handle_channel(
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     logger.info(f"Reading from skim dir {skim_dir}")
 
     # Get Dask Client
-    client = utils.create_dask_client(args.cluster_address)
+    client = utils.create_dask_client(args.cluster_address, args.config)
     skim_dir_root = os.path.expanduser(args.skim_dir)
 
     try:
@@ -115,7 +116,7 @@ if __name__ == "__main__":
         )
 
         # Run on channel
-        for config in utils.get_config(args.config):
+        for config in utils.get_configs(args.config):
             handle_channel(
                 config,
                 args.xrd_redirector,

@@ -43,8 +43,8 @@ if __name__ == "__main__":
     logger = logging.getLogger("Main")
     logger.info("Loaded Program and Arguments")
 
-    channel_config = utils.get_config(args.channel)
-    my_fileset = channel_config.get_dataset(args.fileset_root)
+    config = utils.get_configs(args.channel)[0]
+    my_fileset = config.get_dataset(args.fileset_root)
 
     if args.dataset:
         my_fileset = {args.dataset: my_fileset[args.dataset]}

@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 
-import utils
+from . import utils
 from ..objects import ThingToPlot
 
 
@@ -55,12 +55,11 @@ if __name__ == "__main__":
     logger.info("Creating & Saving Plots")
 
     # Run on channel(s)
-    for channel_name in args.channel:
-        channel_config = utils.get_config(channel_name)
-        output_dir = os.path.join(args.output_dir, channel_config.name)
+    for config in utils.get_configs(args.channel):
+        output_dir = os.path.join(args.output_dir, config.name)
         with open(os.path.join(output_dir, "results.pkl"), "rb") as file:
             results = pickle.load(file)
 
         save_results(
-            output_dir, args.extension, channel_config.get_things_to_plot(), results
+            output_dir, args.extension, config.get_things_to_plot(), results
         )

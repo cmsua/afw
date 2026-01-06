@@ -8,7 +8,7 @@ import hist
 import mplhep as hep
 import numpy as np
 
-from .base import ThingToPlot
+from .objects import ThingToPlot
 
 
 def stacked_colors(num: int) -> list[str]:

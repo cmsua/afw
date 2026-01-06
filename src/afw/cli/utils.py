@@ -3,20 +3,21 @@ Utilities for CLI tools
 """
 
 import argparse
+import importlib.util
 import logging
 import os
-import importlib
-
+import sys
+import inspect
 from dask.distributed import Client
 
-from .objects import AnalysisConfig
+from ..objects import AnalysisConfig
 
 logger = logging.getLogger("utils")
 
 
 # Dask Cluster Util
 # Returns Client, Cluster
-def create_dask_client(cluster_address: str, upload: bool = True):
+def create_dask_client(cluster_address: str, upload_files: list[str] = []):
     """
     Creates a Dask client and optionally uploads required Python code.
 
@@ -29,20 +30,22 @@ def create_dask_client(cluster_address: str, upload: bool = True):
 
     Parameters:
         cluster_address(str): One of the above supported clients
-        upload (bool, default True): Whether to upload local files to the cluster
+        upload_files (list[str], default []):  Local python files to upload to the Dask client
 
     Returns:
         dask.distributed.Client: A Dask client
     """
     logger.info("Loading Dask client")
     if cluster_address == "local":
+        upload = False
+
         from dask.distributed import LocalCluster
 
         cluster = LocalCluster()
         client = cluster.get_client()
+    elif cluster_address == "gateway":
         upload = False
 
-    elif cluster_address == "gateway":
         logger.debug("Connecting to gateway")
         from dask_gateway import Gateway
 
@@ -55,14 +58,15 @@ def create_dask_client(cluster_address: str, upload: bool = True):
         cluster = gateway.connect(clusters[0].name)
         client = Client(cluster, timeout=60)
     else:
+        upload = True
+
         logger.debug(f"Connecting to cluster at {cluster_address}")
         client = Client(cluster_address)
 
     if upload:
         # Upload Files
         logger.debug("Uploading files to workers...")
-        files = [file for file in os.listdir() if file.endswith(".py")]
-        for file in files:
+        for file in upload_files:
             logger.debug(f"Uploading file {file}")
             client.upload_file(file)
 
@@ -138,19 +142,26 @@ def get_common_args():
 
 
 # Get config from ee, emu, mumu, or common (common is only used for skimming)
-def get_configs(name: str) -> list[AnalysisConfig]:
+def get_configs(file_path: str, module_name: str = "config") -> list[AnalysisConfig]:
     """
-    Returns an analysis config from a given name
+    Returns an analysis config from a given name. The file will be imported as the given module name.
 
     Parameters:
-        name (str): The path to a python module
+        file_path (str): The path to a python module
+        module_name (str, default "config"): The name of the module this file should be imported as
 
     Returns:
         list[objects.AnalysisConfig]: All AnalysisConfigs in said module
     """
-    obj = importlib.import_module(name)
-    return [i for i in obj if isinstance(i, AnalysisConfig)]
+    # Code taken form importlib docs
+    spec = importlib.util.spec_from_file_location("config", file_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
 
+    # Inspect module
+    return [cls() for cls in module.__all__]
+    
 
 # LOGGING
 class Formatter(logging.Formatter):
