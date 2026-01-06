@@ -14,7 +14,7 @@ import sys
 from functools import reduce
 from pathlib import Path
 
-ROOT = os.path.abspath("../..")
+ROOT = os.path.abspath("../../src")
 sys.path.insert(0, ROOT)
 
 
