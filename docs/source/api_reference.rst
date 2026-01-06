@@ -7,6 +7,4 @@ API Reference Guide
     :template: custom-module-template.rst
     :recursive:
 
-    configs
-    dataset
-    utils
+    afw
