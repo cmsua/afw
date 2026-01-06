@@ -7,14 +7,13 @@ import subprocess
 import awkward as ak
 import dask
 import dask_awkward as dak
-import dataset
-import dataset.skimmed
 import uproot
 from coffea.dataset_tools import apply_to_fileset, preprocess
 from coffea.nanoevents import NanoAODSchema
 
 from ..objects import AnalysisConfig
 from . import utils
+from ..dataset import print_summary, skimmed
 
 ## SOURCE: https://github.com/scikit-hep/coffea/discussions/1100
 
@@ -79,12 +78,12 @@ def handle_config(
     my_dataset = config.get_dataset(xrd_redirector)
 
     # Print
-    dataset.print_summary(my_dataset, logger, use_short_name=False)
+    print_summary(my_dataset, logger, use_short_name=False)
 
     # Check for directories to run on
     for dataset_name in list(my_dataset.keys()):
         dataset_dir = os.path.join(
-            skim_dir, config.name, dataset.skimmed.escape_name(dataset_name)
+            skim_dir, config.name, skimmed.escape_name(dataset_name)
         )
         # Only run on existing directories
         if not os.path.isdir(dataset_dir):
@@ -144,20 +143,20 @@ def handle_config(
                 skim, dataset_runnable, schemaclass=NanoAODSchema
             )
 
-        skimmed = uproot_writeable(skimmed_dict[fileset_name])
-        skimmed = skimmed.repartition(
+        skimmed_writable = uproot_writeable(skimmed_dict[fileset_name])
+        skimmed_writable = skimmed_writable.repartition(
             n_to_one=15,
         )  # Reparititioning so that output file contains ~100_000 eventspartition
 
         # Output directory
         destination = os.path.join(
-            skim_dir, dataset.skimmed.escape_name(fileset_name)
+            skim_dir, skimmed.escape_name(fileset_name)
         )
 
         # Return so that compute can be called
         logger.debug("Writing...")
         result = uproot.dask_write(
-            skimmed,
+            skimmed_writable,
             compute=not run_combined,
             tree_name="Events",
             destination=destination,
