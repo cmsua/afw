@@ -1,3 +1,4 @@
+"""Plotting utilities"""
 import logging
 import os
 import pickle
@@ -7,8 +8,17 @@ from ..objects import ThingToPlot
 
 
 def save_results(
-    output_dir: str, extension: str, things: list[ThingToPlot], plots: dict
+    output_dir: str, extension: str, things: list[ThingToPlot], data: dict
 ) -> None:
+    """
+    Save plots to a file
+    
+    Params:
+        output_dir (str): the directory to save plots to (including the config name)
+        extension (str): The file extension to use when saving plots
+        things (list[ThingToPlot]): All objects used to save plots
+        data (dict): The object containing histograms
+    """
     # Actually plot
     # Try running with joblib
     try:
@@ -16,7 +26,7 @@ def save_results(
 
         joblib.Parallel(n_jobs=-2)(
             joblib.delayed(thing.plot_histogram)(
-                plots[thing.title],
+                data[thing.title],
                 os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
             )
             for thing in things
@@ -26,7 +36,7 @@ def save_results(
 
         for thing in things:
             thing.plot_histogram(
-                plots[thing.title],
+                data[thing.title],
                 os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
             )
 

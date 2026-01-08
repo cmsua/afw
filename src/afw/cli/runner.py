@@ -68,6 +68,7 @@ def handle_channel(
     logger.info(f"Processed {report['entries'] / (elapsed):>15,.0f} events/s")
 
     # Save results
+    output_dir = os.path.join(output_dir, config.name)
     os.makedirs(output_dir, exist_ok=True)
 
     logger.info("Saving hists")
