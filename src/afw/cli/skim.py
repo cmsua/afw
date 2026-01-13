@@ -150,7 +150,7 @@ def handle_config(
 
         # Output directory
         destination = os.path.join(
-            skim_dir, skimmed.escape_name(fileset_name)
+            skim_dir, config.name, skimmed.escape_name(fileset_name)
         )
 
         # Return so that compute can be called
