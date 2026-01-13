@@ -1,4 +1,5 @@
 """Plotting utilities"""
+
 import logging
 import os
 import pickle
@@ -6,13 +7,15 @@ import pickle
 from . import utils
 from ..objects import ThingToPlot
 
+logger = logging.getLogger("Main")
+
 
 def save_results(
     output_dir: str, extension: str, things: list[ThingToPlot], data: dict
 ) -> None:
     """
     Save plots to a file
-    
+
     Params:
         output_dir (str): the directory to save plots to (including the config name)
         extension (str): The file extension to use when saving plots
@@ -58,7 +61,6 @@ if __name__ == "__main__":
     # Setup Logging
     utils.setup_logging(args.debug)
 
-    logger = logging.getLogger("Main")
     logger.info("Loaded Program and Arguments")
 
     # Get Dask Client
@@ -70,6 +72,4 @@ if __name__ == "__main__":
         with open(os.path.join(output_dir, "results.pkl"), "rb") as file:
             results = pickle.load(file)
 
-        save_results(
-            output_dir, args.extension, config.get_things_to_plot(), results
-        )
+        save_results(output_dir, args.extension, config.get_things_to_plot(), results)
