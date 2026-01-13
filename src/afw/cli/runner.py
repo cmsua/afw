@@ -18,7 +18,7 @@ def handle_channel(
     config: AnalysisConfig,
     xrd_redirector: str,
     output_dir: str,
-    skim_dir: str,
+    skim_dir_root: str,
     runner: Runner,
 ) -> None:
     """Create and save plots for a given :class:`objects.AnalysisConfig`
@@ -27,7 +27,7 @@ def handle_channel(
         config (objects.AnalysisConfig): The config to process
         xrd_redirector (str): The host of the XRootD Redirector to use
         output_dir (str): The output directory for plots
-        skim_dir (str): The input directory for skims
+        skim_dir_root (str): The input directory for skims
         Runner (coffea.processor.Runner): The Coffea runner to use
     """
     logger.info(f"Handling channel {config.name}")
@@ -122,7 +122,7 @@ if __name__ == "__main__":
                 config,
                 args.xrd_redirector,
                 output_dir,
-                skim_dir,
+                skim_dir_root,
                 runner,
             )
     finally:
