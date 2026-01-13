@@ -72,17 +72,10 @@ if __name__ == "__main__":
     skim_dir = os.path.expanduser(args.skim_dir)
     logger.info(f"Writing to skim dir {skim_dir}")
 
-    # Get Dask Client
-    client = utils.create_dask_client(args.cluster_address, [args.config])
-
-    try:
-        # Run on channel(s)
-        for config in utils.get_configs(args.config):
-            logger.info(f"Handling config {config}")
-            merge_skims(
-                config,
-                skim_dir,
-            )
-
-    finally:
-        client.close()
+    # Run on channel(s)
+    for config in utils.get_configs(args.config):
+        logger.info(f"Handling config {config}")
+        merge_skims(
+            config,
+            skim_dir,
+        )
