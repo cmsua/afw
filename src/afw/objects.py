@@ -19,7 +19,7 @@ class ThingToPlot(abc.ABC):
             title (str): The title of the overall plot
         """
         self.title = title
-        self.escaped_name = title.replace("$", "")
+        self.escaped_name = title.replace("$", "").replace("\\", "")
 
     @abc.abstractmethod
     def create_histogram(self) -> hist.Hist:
