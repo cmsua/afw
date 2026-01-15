@@ -67,7 +67,7 @@ if __name__ == "__main__":
     logger.info("Creating & Saving Plots")
 
     # Run on channel(s)
-    for config in utils.get_configs(args.channel):
+    for config in utils.get_configs(args.config):
         output_dir = os.path.join(args.output_dir, config.name)
         with open(os.path.join(output_dir, "results.pkl"), "rb") as file:
             results = pickle.load(file)
