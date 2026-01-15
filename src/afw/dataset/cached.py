@@ -202,7 +202,7 @@ def get_cross_section(fileset: str) -> float:
         logger.critical(
             f"xsecdb failed with response code {response_code} - is your cookie valid?"
         )
-        return
+        raise ValueError(response_code)
 
     if len(result) > 1:
         if all([xsec == xsecs[0] for xsec in xsecs]):
