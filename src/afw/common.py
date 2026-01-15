@@ -54,9 +54,10 @@ def plot_thing(histogram: hist.Hist, title: str, units: str):
     stacked_keys = [key for key in mc_keys if key != "TTTT"]
     stacked_histos = [histogram[key, :] for key in stacked_keys]
 
-    pairs = zip(stacked_keys, stacked_histos)
-    pairs_sorted = sorted(pairs, key=lambda pair: pair[1].sum().value, reverse=True)
-    stacked_keys, stacked_histos = list(zip(*pairs_sorted))
+    # DISABLED: This can vary between plots!
+    # pairs = zip(stacked_keys, stacked_histos)
+    # pairs_sorted = sorted(pairs, key=lambda pair: pair[1].sum().value, reverse=True)
+    # stacked_keys, stacked_histos = list(zip(*pairs_sorted))
 
     fig, (ax_main, ax_comparison) = hep.subplots(nrows=2)
     hep.comp.data_model(
