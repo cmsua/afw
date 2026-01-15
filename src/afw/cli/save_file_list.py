@@ -33,6 +33,7 @@ if __name__ == "__main__":
         "-D",
         "--dataset",
         help="Save only a given dataset",
+        type=list
     )
 
     args = parser.parse_args()
@@ -46,8 +47,11 @@ if __name__ == "__main__":
     config = utils.get_configs(args.channel)[0]
     my_fileset = config.get_dataset(args.fileset_root)
 
+    # Use dataset arg if needed
     if args.dataset:
-        my_fileset = {args.dataset: my_fileset[args.dataset]}
+        for key in my_fileset:
+            if key not in args.dataset:
+                del my_fileset[key]
 
     dataset.print_summary(my_fileset, logger)
 
