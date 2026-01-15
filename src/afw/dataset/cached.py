@@ -191,13 +191,11 @@ def get_cross_section(fileset: str) -> float:
     logger.debug(f"Getting cross-section for fileset {fileset}")
 
     # Search for part matching /TTZH_TuneCP5_13p6TeV_madgraph-pythia8/Run3Summer22EE
-    search_key = re.split(r"NanoAODv\d+", fileset)
-    logger.debug(f"Querying xsecdb with search key {search_key[0]}")
-    result, response_code = do_request(search_key[0])
+    search_key = re.split(r"NanoAODv\d+", fileset)[0]
+    logger.debug(f"Querying xsecdb with search key {search_key}")
+    result, response_code = do_request(search_key)
 
     xsecs = [entry["cross_section"] for entry in result]
-
-    search_key = search_key[-1].replace("/NANOAODSIM", "")
 
     # Checks
     if response_code != 200:
@@ -209,7 +207,7 @@ def get_cross_section(fileset: str) -> float:
     if len(result) > 1:
         if all([xsec == xsecs[0] for xsec in xsecs]):
             logger.warning(
-                f"Fileset {fileset} has more than one result in xsecdb, but they all share a cross-section - returning reuslt"
+                f"Fileset {fileset} has more than one result in xsecdb, but they all share a cross-section - returning result"
             )
         else:
             logger.critical(f"Fileset {fileset} has more than one result in xsecdb!")

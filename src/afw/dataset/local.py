@@ -37,7 +37,7 @@ def build_datasets(defs, xcache_host: str = None):
     # Convert to filesets (aka das keys)
     for query, metadata in defs.items():
         for das_key in cached.get_all_matching(query):
-            result[das_key] = {"metadata": metadata}
+            result[das_key] = {"metadata": metadata.copy()}
 
     # Do magic with dasgoclient
     for key, val in result.items():
