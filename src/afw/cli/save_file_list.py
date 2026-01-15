@@ -45,7 +45,7 @@ if __name__ == "__main__":
     logger.info("Loaded Program and Arguments")
 
     config = utils.get_configs(args.config)[0]
-    my_fileset = config.get_dataset(args.fileset_root)
+    my_fileset = config.get_dataset(args.xrd_redirector)
 
     # Use dataset arg if needed
     if args.dataset:
