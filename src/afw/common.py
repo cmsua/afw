@@ -34,24 +34,28 @@ def stacked_colors(num: int) -> list[str]:
     return colors[0:num]
 
 
-def plot_thing(histogram: hist.Hist, title: str, units: str):
+def plot_thing(
+    histogram: hist.Hist, metadata: dict[str, dict], title: str, units: str
+) -> None:
     """
     A convenience function used to generate a bar graph and Data/MC agreement plot, as well as plot signal
 
     Args:
         histogram (hist.Hist): The histogram object to plot. This should have two axis: a dataset axis and an axis to plot
+        metadata (dict[str, dict]): Metadata for plotting
         title (str): The title of the appropriate histogram
         units (str): The units of bin width, for use when labeling axis
 
     Returns:
         plt.Figure: A figure which may be saved locally
     """
-    data_fields = ["EGamma", "Muon", "MuonEG"]
+    data_fields = [key for key, val in metadata.items() if val.get("isData", True)]
     mc_keys = [field for field in histogram.axes[0] if field not in data_fields]
 
     data = histogram[data_fields, :][sum, :]
 
-    stacked_keys = [key for key in mc_keys if key != "TTTT"]
+    signal_keys = [key for key, val in metadata.items() if val.get("signal", True)]
+    stacked_keys = [key for key in mc_keys if key not in signal_keys]
     stacked_histos = [histogram[key, :] for key in stacked_keys]
 
     # DISABLED: This can vary between plots!
@@ -75,7 +79,8 @@ def plot_thing(histogram: hist.Hist, title: str, units: str):
         ylabel=f"Counts / {min(stacked_histos[0].axes[0].widths):.0f} {units}",
     )
 
-    hep.histplot(histogram["TTTT", :], ax=ax_main, label="TTTT", color="#000000")
+    for signal_key in signal_keys:
+        hep.histplot(histogram[signal_key, :], ax=ax_main, label=signal_key, color="#000000")
 
     ax_main.set_yscale("log")
 
@@ -133,8 +138,10 @@ class NJetToPlot(ThingToPlot):
 
         return histogram
 
-    def plot_histogram(self, histogram: hist.Hist, output_file: str) -> None:
-        fig = plot_thing(histogram[:, ::10j], self.title, "GeV")
+    def plot_histogram(
+        self, histogram: hist.Hist, metadata: dict, output_file: str
+    ) -> None:
+        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "GeV")
         fig.savefig(output_file)
 
 
@@ -154,8 +161,10 @@ class DiscriminantToPlot(ThingToPlot, abc.ABC):
         axis = hist.axis.Regular(500, 0, 1, name="score", label=self.title)
         return create_single_axis_histogram(axis)
 
-    def plot_histogram(self, histogram: hist.Hist, output_file: str) -> None:
-        fig = plot_thing(histogram[:, ::10j], self.title, "Units")
+    def plot_histogram(
+        self, histogram: hist.Hist, metadata: dict, output_file: str
+    ) -> None:
+        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "Units")
         fig.savefig(output_file)
 
 
@@ -203,8 +212,10 @@ class PtToPlot(ThingToPlot):
 
         return histogram
 
-    def plot_histogram(self, histogram: hist.Hist, output_file: str) -> None:
-        fig = plot_thing(histogram[:, ::10j], self.title, "GeV")
+    def plot_histogram(
+        self, histogram: hist.Hist, metadata: dict, output_file: str
+    ) -> None:
+        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "GeV")
         fig.savefig(output_file)
 
 
@@ -252,8 +263,10 @@ class EtaToPlot(ThingToPlot):
 
         return histogram
 
-    def plot_histogram(self, histogram: hist.Hist, output_file: str) -> None:
-        fig = plot_thing(histogram[:, ::10j], self.title, "Radians")
+    def plot_histogram(
+        self, histogram: hist.Hist, metadata: dict, output_file: str
+    ) -> None:
+        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "Radians")
         fig.savefig(output_file)
 
 
@@ -321,6 +334,8 @@ class DileptonMassToPlot(ThingToPlot):
 
         return histogram
 
-    def plot_histogram(self, histogram: hist.Hist, output_file: str) -> None:
-        fig = plot_thing(histogram[:, ::10j], self.title, "GeV")
+    def plot_histogram(
+        self, histogram: hist.Hist, metadata: dict, output_file: str
+    ) -> None:
+        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "GeV")
         fig.savefig(output_file)

@@ -54,12 +54,13 @@ class ThingToPlot(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def plot_histogram(self, histogram: hist.Hist, output_file: str) -> None:
+    def plot_histogram(self, histogram: hist.Hist, metadata: dict, output_file: str) -> None:
         """
         Plot a filled histogram to a given file
 
         Args:
             histogram (hist.Hist): The filled histogram to plot.
+            metadata (dict): The metadata for use with generating plots.
             output_file (str): The output file, given as an absolute path.
             **kwargs (dict | None): A set of keyword arguments created in by the analysis config.
 

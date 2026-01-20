@@ -26,7 +26,7 @@ To promote code reuse as much as possible, the histogramming and plotting code h
 - ``__init__(name)`` creates the object. Though many subclasses require fewer or more parameters, the ``name`` parameter is both the key in which the histogram is saved in the output file as well as the title of the generated plot
 - ``create_histogram`` is intended to create a :class:`hist.Histogram` object with any given amount of axis, though it may return any object that can be pickled and reduced.
 - ``fill_histogram(histogram, events, dataset, weights, **kwargs)`` is designed to apply the data provided to the object created in ``create_histogram``. This is presumed to be a destructive method on the histogram object, but non-destructive on events, dataset, weights, and other ``kwargs``.
-- ``plot_histogram(histogram, output_file)`` is designed to save a copy of the filled and reduced histogram generated above. Note that this is done in addition to a pickled version of the histogram object, making this function ideal for saving large (and recreatable) objects such as graphics.
+- ``plot_histogram(histogram, metadata, output_file)`` is designed to save a copy of the filled and reduced histogram generated above. Note that this is done in addition to a pickled version of the histogram object, making this function ideal for saving large (and recreatable) objects such as graphics.
 
 To interface with the plots being generated, the AnalysisConfig class contains two methods:
 

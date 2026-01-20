@@ -10,8 +10,30 @@ from ..objects import ThingToPlot
 logger = logging.getLogger("Main")
 
 
+def generate_metadata(dataset: dict) -> dict[str, dict]:
+    """
+    Creates metadata for a dataset
+
+    Params:
+        dataset (dict): The dataset with files/etc
+
+    Results:
+        dict[str, dict]: A dictionary with keys being shortNames
+    """
+    metadata = {}
+    for key, val in dataset.items():
+        name = val["metadata"]["shortName"]
+        metadata[name] = {**metadata.get(name, {}), **val["metadata"]}
+
+    return metadata
+
+
 def save_results(
-    output_dir: str, extension: str, things: list[ThingToPlot], data: dict
+    output_dir: str,
+    extension: str,
+    things: list[ThingToPlot],
+    metadata: dict,
+    data: dict,
 ) -> None:
     """
     Save plots to a file
@@ -20,6 +42,7 @@ def save_results(
         output_dir (str): the directory to save plots to (including the config name)
         extension (str): The file extension to use when saving plots
         things (list[ThingToPlot]): All objects used to save plots
+        metadata (dict): The metadata for plotting
         data (dict): The object containing histograms
     """
     # Actually plot
@@ -30,6 +53,7 @@ def save_results(
         joblib.Parallel(n_jobs=-2)(
             joblib.delayed(thing.plot_histogram)(
                 data[thing.title],
+                metadata,
                 os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
             )
             for thing in things
@@ -40,6 +64,7 @@ def save_results(
         for thing in things:
             thing.plot_histogram(
                 data[thing.title],
+                metadata,
                 os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
             )
 
@@ -72,4 +97,7 @@ if __name__ == "__main__":
         with open(os.path.join(output_dir, "results.pkl"), "rb") as file:
             results = pickle.load(file)
 
-        save_results(output_dir, args.extension, config.get_things_to_plot(), results)
+        metadata = generate_metadata(config.get_dataset())
+        save_results(
+            output_dir, args.extension, config.get_things_to_plot(), metadata, results
+        )

@@ -75,7 +75,8 @@ def handle_channel(
     with open(os.path.join(output_dir, "results.pkl"), "wb") as file:
         pickle.dump(results, file)
 
-    plotter.save_results(output_dir, "png", config.get_things_to_plot(), results)
+    metadata = plotter.generate_metadata(my_dataset)
+    plotter.save_results(output_dir, "png", config.get_things_to_plot(), metadata, results)
 
 
 if __name__ == "__main__":
