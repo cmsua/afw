@@ -120,14 +120,14 @@ def run_dasgoclient(query: str) -> dict:
 # XSecDB
 # Only save authenticated CURLs
 @persist_to_file("xsecdb")
-def do_request(das_key: str) -> dict:
+def do_request(process_name: str) -> dict:
     """
     Query xsecdb for a given DAS key and returns the json result
 
     This requires a cookie.txt file and persists to disk
 
     Args:
-        das_key (str): The DAS key to query xsecdb for
+        process_name (str): The thing to query xsecdb for
 
     Returns:
         dict: The result from xsecdb
@@ -154,8 +154,8 @@ def do_request(das_key: str) -> dict:
         c.setopt(pycurl.URL, f"{base_url}/api/search")
 
     request = {
-        "search": {"DAS": das_key},
-        "orderBy": {"DAS": -1},
+        "search": {"process_name": process_name},
+        "orderBy": {"process_name": -1},
         "pagination": {"currentPage": 0, "pageSize": 10},
     }
     body = json.dumps(request)
@@ -191,7 +191,7 @@ def get_cross_section(fileset: str) -> float:
     logger.debug(f"Getting cross-section for fileset {fileset}")
 
     # Search for part matching /TTZH_TuneCP5_13p6TeV_madgraph-pythia8/Run3Summer22EE
-    search_key = re.split(r"NanoAODv\d+", fileset)[0]
+    search_key = fileset.split('/')[1]
     logger.debug(f"Querying xsecdb with search key {search_key}")
     result, response_code = do_request(search_key)
 
