@@ -32,7 +32,7 @@ if os.path.exists(override_file):
         overrides = yaml.safe_load(file)
 
     if not isinstance(overrides, dict):
-        logger.critical("Overrides is not a valid python dict object! Replacing...")
+        logger.critical("Overrides is not a valid python dict object! Ignoring...")
         overrides = {}
 
 # Curl client
