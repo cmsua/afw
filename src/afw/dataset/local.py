@@ -71,6 +71,14 @@ def build_datasets(defs, xcache_host: str = None):
         val["metadata"]["nevents"] = nevents
         val["files"] = files
 
+    # Check for empty
+    for fileset_name, fileset in list(result.items()):
+        if len(fileset["files"]) == 0:
+            logger.critical(
+                f"Fileset {fileset_name} (short name {fileset['metadata']['shortName']}) has zero files!"
+            )
+            del result[fileset_name]
+
     # Add xsecs
     for key, val in result.items():
         if val["metadata"].get("isData", False):
@@ -81,13 +89,5 @@ def build_datasets(defs, xcache_host: str = None):
             )
             continue
         val["metadata"]["xsec"] = cached.get_cross_section(key)
-
-    # Check for empty
-    for fileset_name, fileset in list(result.items()):
-        if len(fileset["files"]) == 0:
-            logger.critical(
-                f"Fileset {fileset_name} (short name {fileset['metadata']['shortName']}) has zero files!"
-            )
-            del result[fileset_name]
 
     return result
