@@ -206,7 +206,7 @@ def get_cross_section(fileset: str) -> float:
 
     if len(result) > 1:
         if all([xsec == xsecs[0] for xsec in xsecs]):
-            logger.warning(
+            logger.debug(
                 f"Fileset {fileset} has more than one result in xsecdb, but they all share a cross-section - returning result"
             )
         else:
