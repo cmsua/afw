@@ -52,6 +52,10 @@ def plot_thing(
     data_fields = [key for key, val in metadata.items() if val.get("isData", True)]
     mc_keys = [field for field in histogram.axes[0] if field not in data_fields]
 
+    # Filter - some categories get ALL events filtered and thus aren't present in the histograms
+    data_fields = [field for field in data_fields if field in histogram.axes[0]]
+    mc_keys = [field for field in mc_keys if field in histogram.axes[0]]
+
     data = histogram[data_fields, :][sum, :]
 
     signal_keys = [key for key, val in metadata.items() if val.get("signal", True)]
