@@ -41,6 +41,8 @@ c = None
 # Rucio client
 client = None
 
+cache_dir = os.path.join(os.curdir, "cache")
+
 
 def persist_to_file(file_name: str):
     """
@@ -49,12 +51,13 @@ def persist_to_file(file_name: str):
     Args:
         file_name (str): The base name (without extension) to save results to
     """
-    cache_file = os.path.join(os.curdir, "cache", file_name)
+    cache_file = os.path.join(cache_dir, file_name)
 
     yaml_file = cache_file + ".yaml"
     pickle_file = cache_file + ".pkl"
 
     cache = {}
+    # Load if exists, prefer pickle for speed but allow fallback to yaml
     if os.path.exists(pickle_file):
         with open(pickle_file, "rb") as file:
             cache = pickle.load(file)
@@ -65,22 +68,31 @@ def persist_to_file(file_name: str):
             cache = yaml.full_load(file)
             logger.warning("Loaded cache from yaml file and not pickle!")
 
+    # Fault on no value
     if not isinstance(cache, dict):
         logger.critical(f"Cache loaded as non-dict, resetting: {cache}")
         cache = {}
+
+    # Don't save _changed tag
     if "_changed" in cache:
         del cache["_changed"]
 
     def save_cache():
+        # If cache is unchanged, ignore
         if not cache.get("_changed", False):
             return
-        with open(yaml_file, "w") as file:
-            yaml.dump(cache, file)
+
+        os.makedirs(cache_dir, exist_ok=True)
+
+        # Dump pickle first
         with open(pickle_file, "wb") as file:
             pickle.dump(cache, file)
+        with open(yaml_file, "w") as file:
+            yaml.dump(cache, file)
 
     atexit.register(save_cache)
 
+    # Return from cache if possible
     def decorator(func):
         def new_func(param):
             if param not in cache:
@@ -191,7 +203,7 @@ def get_cross_section(fileset: str) -> float:
     logger.debug(f"Getting cross-section for fileset {fileset}")
 
     # Search for part matching /TTZH_TuneCP5_13p6TeV_madgraph-pythia8/Run3Summer22EE
-    search_key = fileset.split('/')[1]
+    search_key = fileset.split("/")[1]
     logger.debug(f"Querying xsecdb with search key {search_key}")
     result, response_code = do_request(search_key)
 
