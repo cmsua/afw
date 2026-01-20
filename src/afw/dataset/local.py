@@ -115,7 +115,11 @@ def build_datasets(defs, xcache_host: str = None) -> dict:
                 continue
 
             # Save file, add nevents
-            files[xcache_host + file["name"]] = "Events"
+            file_path = (
+                xcache_host + file["name"] if xcache_host is not None else file["name"]
+            )
+            files[file_path] = "Events"
+
             nevents += file["nevents"]
 
         val["metadata"]["nevents"] = nevents
