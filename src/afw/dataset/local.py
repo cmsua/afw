@@ -68,7 +68,8 @@ def remove_obsolete_versions(dataset: dict) -> dict:
                 if len(dataset[key]['files']) != 0:
                     logger.critical(f"Outdated key still has files remaining - superseded by version {vers_avail} ({key})")
                     continue
-
+                
+                logger.debug(f"Deleting outdated version {vers} as zero files are available: {key}")
                 del dataset[key]
     
     return dataset
