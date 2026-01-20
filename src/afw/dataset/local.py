@@ -11,6 +11,7 @@ logger = logging.getLogger("Local Dataset Builder")
 
 veto = None
 
+
 # Remove vetoed files
 def is_vetoed(file: str) -> bool:
     """
@@ -59,20 +60,27 @@ def remove_obsolete_versions(dataset: dict) -> dict:
         # For each superseded version
         for i, vers in enumerate(vers_avail[:-1]):
             # Find outdated keys
-            outdated_key_prefix = name + '-v' + str(vers)
-            outdated_keys = [key for key in dataset if key.startswith(outdated_key_prefix)]
+            outdated_key_prefix = name + "-v" + str(vers)
+            outdated_keys = [
+                key for key in dataset if key.startswith(outdated_key_prefix)
+            ]
 
             # For each outdated key
             for key in outdated_keys:
                 # Prune if possible
-                if len(dataset[key]['files']) != 0:
-                    logger.critical(f"Outdated key still has files remaining - superseded by version {vers_avail} ({key})")
-                    continue
-                
-                logger.debug(f"Deleting outdated version {vers} as zero files are available: {key}")
+                if len(dataset[key]["files"]) != 0:
+                    logger.critical(
+                        f"Outdated key still has files remaining, removing anyways! - superseded by version {vers_avail[-1]} ({key})"
+                    )
+
+                logger.debug(
+                    f"Deleting outdated version {vers} as zero files are available: {key}"
+                )
                 del dataset[key]
-    
+
     return dataset
+
+
 def build_datasets(defs, xcache_host: str = None) -> dict:
     # Actually load from Rucio
     result = {}
@@ -123,20 +131,19 @@ def build_datasets(defs, xcache_host: str = None) -> dict:
             )
             del result[fileset_name]
 
-
     # Add xsecs
     for key, val in list(result.items()):
         # Data has no xsec
         if val["metadata"].get("isData", False):
             continue
-            
+
         # If defined by yaml, skip
         if "xsec" in val["metadata"]:
             logger.debug(
                 f"Skipping xsecdb for fileset as already present in definition: {key}"
             )
             continue
-        
+
         # Assign xsec to value, skip if zero
         xsec = cached.get_cross_section(key)
         if xsec == 0:
