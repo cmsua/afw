@@ -58,7 +58,7 @@ def plot_thing(
 
     data = histogram[data_fields, :][sum, :]
 
-    signal_keys = [key for key, val in metadata.items() if val.get("signal", True)]
+    signal_keys = [key for key, val in metadata.items() if val.get("signal", False)]
     stacked_keys = [key for key in mc_keys if key not in signal_keys]
     stacked_histos = [histogram[key, :] for key in stacked_keys]
 
