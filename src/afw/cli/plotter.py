@@ -97,7 +97,7 @@ if __name__ == "__main__":
         with open(os.path.join(output_dir, "results.pkl"), "rb") as file:
             results = pickle.load(file)
 
-        metadata = generate_metadata(config.get_dataset())
+        metadata = generate_metadata(config.get_dataset(None))
         save_results(
             output_dir, args.extension, config.get_things_to_plot(), metadata, results
         )
