@@ -11,7 +11,7 @@ logger = logging.getLogger("Local Dataset Builder")
 
 veto = None
 
-
+# Remove vetoed files
 def is_vetoed(file: str) -> bool:
     """
     Checks if a file is specifically vetoed
@@ -31,7 +31,48 @@ def is_vetoed(file: str) -> bool:
     return file in veto
 
 
-def build_datasets(defs, xcache_host: str = None):
+def remove_obsolete_versions(dataset: dict) -> dict:
+    """
+    Removes obsolete versions with no files from a given dataset. Assumes dataset keys are in the format XXX-v1/XXX
+
+    Params:
+        defs (dict): The dataset to procecss
+
+    Returns:
+        dict: The processed dict
+    """
+    # List all available
+    vers_avail_map = {}
+    for key, fileset in list(dataset.items()):
+        name, vers = key.rsplit("-", 1)
+        vers = int(vers.split("/")[0].replace("v", ""))
+
+        # No existing => continue
+        if name not in vers_avail_map:
+            vers_avail_map[name] = []
+
+        vers_avail_map[name] += [vers]
+
+    # Start pruning
+    for name, vers_avail in vers_avail_map.items():
+        vers_avail = list(sorted(vers_avail))
+        # For each superseded version
+        for i, vers in enumerate(vers_avail[:-1]):
+            # Find outdated keys
+            outdated_key_prefix = name + '-v' + str(vers)
+            outdated_keys = [key for key in dataset if key.startswith(outdated_key_prefix)]
+
+            # For each outdated key
+            for key in outdated_keys:
+                # Prune if possible
+                if len(dataset[key]['files']) != 0:
+                    logger.critical(f"Outdated key still has files remaining - superseded by version {vers_avail} ({key})")
+                    continue
+
+                del dataset[key]
+    
+    return dataset
+def build_datasets(defs, xcache_host: str = None) -> dict:
     # Actually load from Rucio
     result = {}
     # Convert to filesets (aka das keys)
@@ -71,6 +112,8 @@ def build_datasets(defs, xcache_host: str = None):
         val["metadata"]["nevents"] = nevents
         val["files"] = files
 
+    result = remove_obsolete_versions(result)
+
     # Check for empty
     for fileset_name, fileset in list(result.items()):
         if len(fileset["files"]) == 0:
@@ -79,15 +122,26 @@ def build_datasets(defs, xcache_host: str = None):
             )
             del result[fileset_name]
 
+
     # Add xsecs
-    for key, val in result.items():
+    for key, val in list(result.items()):
+        # Data has no xsec
         if val["metadata"].get("isData", False):
             continue
+            
+        # If defined by yaml, skip
         if "xsec" in val["metadata"]:
             logger.debug(
                 f"Skipping xsecdb for fileset as already present in definition: {key}"
             )
             continue
-        val["metadata"]["xsec"] = cached.get_cross_section(key)
+        
+        # Assign xsec to value, skip if zero
+        xsec = cached.get_cross_section(key)
+        if xsec == 0:
+            logger.critical(f"Cross-section is zero for key {key}, removing!")
+            del result[key]
+
+        val["metadata"]["xsec"] = xsec
 
     return result
