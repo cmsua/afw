@@ -145,7 +145,7 @@ class NJetToPlot(ThingToPlot):
     def plot_histogram(
         self, histogram: hist.Hist, metadata: dict, output_file: str
     ) -> None:
-        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "GeV")
+        fig = plot_thing(histogram, metadata, self.title, "Jet")
         fig.savefig(output_file)
 
 
