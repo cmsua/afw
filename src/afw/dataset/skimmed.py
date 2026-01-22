@@ -26,7 +26,7 @@ def convert_to_skimmed(dataset: dict, skim_dir: str) -> dict:
 
     Args:
         dataset (dict): A fully-rendered dataset with files and metadata
-        skim_dir (str): A local directory to check for skims in
+        skim_dir (str): A local directory to check for skims in. This must be an absolute path as the dask client will run from ``$HOME``, not the current working directory
 
     Returns:
         dict: A fully-rendered dataset with skims replacing root files
@@ -34,7 +34,7 @@ def convert_to_skimmed(dataset: dict, skim_dir: str) -> dict:
 
     result = {}
 
-    merged_dir = os.path.abspath(os.path.join(skim_dir, "merged"))
+    merged_dir = os.path.join(skim_dir, "merged")
     has_merged = os.path.isdir(merged_dir)
     if has_merged:
         logger.info("Using merged skim files!")

@@ -36,7 +36,7 @@ def handle_channel(
     my_dataset = config.get_dataset(xrd_redirector)
 
     # Check for skims
-    skim_dir = os.path.join(skim_dir_root, config.name)
+    skim_dir = os.path.abspath(os.path.join(skim_dir_root, config.name))
     if os.path.isdir(skim_dir):
         my_dataset = dataset.skimmed.convert_to_skimmed(my_dataset, skim_dir)
     else:
