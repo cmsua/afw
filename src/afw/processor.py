@@ -29,20 +29,7 @@ class MyProcessor(ProcessorABC):
             extra_args = {}
 
         ## Weights
-        weights = Weights(len(events))
-        if "isData" in events.metadata and events.metadata.get("isData", False):
-            weights.add("nominal", ak.ones_like(events.event))
-        else:
-            # weights.add("genWeight", events.genWeight)
-            weights.add(
-                "xsec",
-                ak.ones_like(events.genWeight)
-                * lumi22EE
-                * events.metadata["xsec"]
-                / events.metadata["nevents"],
-            )
-
-        weights = weights.weight()
+        weights = self.config.create_weights(events, extra_args)
 
         ## Fill histograms
         dataset = events.metadata["shortName"]

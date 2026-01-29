@@ -54,7 +54,9 @@ class ThingToPlot(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def plot_histogram(self, histogram: hist.Hist, metadata: dict, output_file: str) -> None:
+    def plot_histogram(
+        self, histogram: hist.Hist, metadata: dict, output_file: str
+    ) -> None:
         """
         Plot a filled histogram to a given file
 
@@ -158,6 +160,22 @@ class AnalysisConfig(abc.ABC):
             dict[ak.Array]: A set of keyword arguments that will get passed to the ThingToPlot.fill_histogram method
         """
         pass
+
+    @abc.abstractmethod
+    def create_weights(
+        self, events: ak.Array, augmented_data: dict[ak.Array]
+    ) -> ak.Array:
+        """
+        Create an awkward array sharing a length with ``events`` with the weights of said events
+
+
+        Args:
+            events (ak.Array): An awkward array of events post event selection
+            augmented_data (dict[ak.Array]): Additional data from ``self.augment_events()``
+
+        Returns:
+            ak.Array: A 1-d awkward array with type ``float`` and sharing a length with ``events``
+        """
 
     @abc.abstractmethod
     def get_things_to_plot(self) -> list[ThingToPlot]:
