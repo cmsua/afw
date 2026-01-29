@@ -13,13 +13,13 @@ class ThingToPlot(abc.ABC):
     A generic class representing any given object to plot
     """
 
-    def __init__(self, title: str):
+    def __init__(self, label: str):
         """
         Parameters:
-            title (str): The title of the overall plot
+            label (str): The label of the overall plot
         """
-        self.title = title
-        self.escaped_name = title.replace("$", "").replace("\\", "").replace("/", "")
+        self.label = label
+        self.escaped_name = label.replace("$", "").replace("\\", "").replace("/", "")
 
     @abc.abstractmethod
     def create_histogram(self) -> hist.Hist:
@@ -55,7 +55,11 @@ class ThingToPlot(abc.ABC):
 
     @abc.abstractmethod
     def plot_histogram(
-        self, histogram: hist.Hist, metadata: dict, output_file: str
+        self,
+        histogram: hist.Hist,
+        metadata: dict,
+        title: str,
+        output_file: str,
     ) -> None:
         """
         Plot a filled histogram to a given file
@@ -63,6 +67,7 @@ class ThingToPlot(abc.ABC):
         Args:
             histogram (hist.Hist): The filled histogram to plot.
             metadata (dict): The metadata for use with generating plots.
+            title (str): The title (eg. channel) to use
             output_file (str): The output file, given as an absolute path.
             **kwargs (dict | None): A set of keyword arguments created in by the analysis config.
 

@@ -35,7 +35,7 @@ def stacked_colors(num: int) -> list[str]:
 
 
 def plot_thing(
-    histogram: hist.Hist, metadata: dict[str, dict], title: str, units: str
+    histogram: hist.Hist, metadata: dict[str, dict], title: str, xlabel: str, units: str
 ) -> None:
     """
     A convenience function used to generate a bar graph and Data/MC agreement plot, as well as plot signal
@@ -44,6 +44,7 @@ def plot_thing(
         histogram (hist.Hist): The histogram object to plot. This should have two axis: a dataset axis and an axis to plot
         metadata (dict[str, dict]): Metadata for plotting
         title (str): The title of the appropriate histogram
+        xlabel (str): The x label of the appropriate histogram
         units (str): The units of bin width, for use when labeling axis
 
     Returns:
@@ -79,7 +80,6 @@ def plot_thing(
         h1_label="Data",
         h2_label="MC",
         comparison="split_ratio",
-        xlabel=title,
         ylabel=f"Counts / {min(stacked_histos[0].axes[0].widths):.0f} {units}",
     )
 
@@ -92,12 +92,14 @@ def plot_thing(
         data,
         sum(stacked_histos),
         ax_comparison_2,
-        comparison="relative_difference"
+        comparison="relative_difference",
+        xlabel=xlabel,
     )
 
 
     # Log Scale
     # ax_main.set_yscale("log")
+    ax_main.set_title(title)
 
     # Label
     hep.cms.label(
@@ -134,7 +136,7 @@ class NJetToPlot(ThingToPlot):
     """
 
     def __init__(self):
-        super().__init__(title="NJets")
+        super().__init__(label="NJets")
 
     def create_histogram(self) -> hist.Hist:
         axis = hist.axis.Variable(
@@ -155,9 +157,9 @@ class NJetToPlot(ThingToPlot):
         return histogram
 
     def plot_histogram(
-        self, histogram: hist.Hist, metadata: dict, output_file: str
+        self, histogram: hist.Hist, metadata: dict, title: str, output_file: str
     ) -> None:
-        fig = plot_thing(histogram, metadata, self.title, "Jet")
+        fig = plot_thing(histogram, metadata, title, self.label, "Jet")
         fig.savefig(output_file)
 
 
@@ -166,21 +168,21 @@ class DiscriminantToPlot(ThingToPlot, abc.ABC):
     Plot a discriminant (a float ranging from 0 to 1) such as DeepJet Score
     """
 
-    def __init__(self, title: str):
+    def __init__(self, label: str):
         """
         Parameters:
-            title (str): The title of the overall plot.
+            label (str): The label of the overall plot.
         """
-        super().__init__(title=title)
+        super().__init__(label=label)
 
     def create_histogram(self) -> hist.Hist:
-        axis = hist.axis.Regular(500, 0, 1, name="score", label=self.title)
+        axis = hist.axis.Regular(500, 0, 1, name="score", label=self.label)
         return create_single_axis_histogram(axis)
 
     def plot_histogram(
-        self, histogram: hist.Hist, metadata: dict, output_file: str
+        self, histogram: hist.Hist, metadata: dict, title: str, output_file: str
     ) -> None:
-        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "Units")
+        fig = plot_thing(histogram[:, ::10j], metadata, title, self.label, "Units")
         fig.savefig(output_file)
 
 
@@ -191,14 +193,14 @@ class PtToPlot(ThingToPlot):
     No check is done to ensure the given lepton is present. Non-present leptons will result in a crash.
     """
 
-    def __init__(self, title: str, lepton_name: str, index: int):
+    def __init__(self, label: str, lepton_name: str, index: int):
         """
         Parameters:
-            title (str): The title of the overall plot.
+            label (str): The label of the overall plot.
             lepton_name (str): The name of the lepton. This should match a key in events.
             index (int): The index of the targeted lepton.
         """
-        super().__init__(title=title)
+        super().__init__(label=label)
         self.lepton_name = lepton_name
         self.index = index
 
@@ -208,7 +210,7 @@ class PtToPlot(ThingToPlot):
             0,
             500,
             name="pt",
-            label=self.title,
+            label=self.label,
         )
         return create_single_axis_histogram(axis)
 
@@ -229,9 +231,9 @@ class PtToPlot(ThingToPlot):
         return histogram
 
     def plot_histogram(
-        self, histogram: hist.Hist, metadata: dict, output_file: str
+        self, histogram: hist.Hist, metadata: dict, title: str, output_file: str
     ) -> None:
-        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "GeV")
+        fig = plot_thing(histogram[:, ::10j], metadata, title, self.label, "GeV")
         fig.savefig(output_file)
 
 
@@ -242,14 +244,14 @@ class EtaToPlot(ThingToPlot):
     No check is done to ensure the given lepton is present. Non-present leptons will result in a crash.
     """
 
-    def __init__(self, title: str, lepton_name: str, index: int):
+    def __init__(self, label: str, lepton_name: str, index: int):
         """
         Parameters:
-            title (str): The title of the overall plot.
+            label (str): The label of the overall plot.
             lepton_name (str): The name of the lepton. This should match a key in events.
             index (int): The index of the targeted lepton.
         """
-        super().__init__(title=title)
+        super().__init__(label=label)
         self.lepton_name = lepton_name
         self.index = index
 
@@ -259,7 +261,7 @@ class EtaToPlot(ThingToPlot):
             -5,
             5,
             name="eta",
-            label=self.title,
+            label=self.label,
         )
         return create_single_axis_histogram(axis)
 
@@ -280,9 +282,9 @@ class EtaToPlot(ThingToPlot):
         return histogram
 
     def plot_histogram(
-        self, histogram: hist.Hist, metadata: dict, output_file: str
+        self, histogram: hist.Hist, metadata: dict, title: str, output_file: str
     ) -> None:
-        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "Radians")
+        fig = plot_thing(histogram[:, ::10j], metadata, title, self.label, "Radians")
         fig.savefig(output_file)
 
 
@@ -295,7 +297,7 @@ class DileptonMassToPlot(ThingToPlot):
 
     def __init__(
         self,
-        title: str,
+        label: str,
         first_lepton_name: str,
         first_lepton_index: int,
         second_lepton_name: str,
@@ -303,13 +305,13 @@ class DileptonMassToPlot(ThingToPlot):
     ):
         """
         Parameters:
-            title (str): The title of the overall plot.
+            label (str): The label of the overall plot.
             first_lepton_name (str): The name of the first lepton. This should match a key in events.
             first_lepton_index (int): The index of the first lepton.
             second_lepton_name (str): The name of the second lepton. This should match a key in events.
             second_lepton_index (int): The index of the second lepton.
         """
-        super().__init__(title=title)
+        super().__init__(label=label)
         self.first_lepton_name = first_lepton_name
         self.first_lepton_index = first_lepton_index
         self.second_lepton_name = second_lepton_name
@@ -321,7 +323,7 @@ class DileptonMassToPlot(ThingToPlot):
             0,
             1000,
             name="mass",
-            label=self.title,
+            label=self.label,
         )
         return create_single_axis_histogram(axis)
 
@@ -351,7 +353,7 @@ class DileptonMassToPlot(ThingToPlot):
         return histogram
 
     def plot_histogram(
-        self, histogram: hist.Hist, metadata: dict, output_file: str
+        self, histogram: hist.Hist, metadata: dict, title: str, output_file: str
     ) -> None:
-        fig = plot_thing(histogram[:, ::10j], metadata, self.title, "GeV")
+        fig = plot_thing(histogram[:, ::10j], metadata, title, self.label, "GeV")
         fig.savefig(output_file)

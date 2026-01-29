@@ -31,6 +31,7 @@ def generate_metadata(dataset: dict) -> dict[str, dict]:
 def save_results(
     output_dir: str,
     extension: str,
+    title: str,
     things: list[ThingToPlot],
     metadata: dict,
     data: dict,
@@ -41,6 +42,7 @@ def save_results(
     Params:
         output_dir (str): the directory to save plots to (including the config name)
         extension (str): The file extension to use when saving plots
+        title (str): The title to use on all things
         things (list[ThingToPlot]): All objects used to save plots
         metadata (dict): The metadata for plotting
         data (dict): The object containing histograms
@@ -52,8 +54,9 @@ def save_results(
 
         joblib.Parallel(n_jobs=-2)(
             joblib.delayed(thing.plot_histogram)(
-                data[thing.title],
+                data[thing.label],
                 metadata,
+                title,
                 os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
             )
             for thing in things
@@ -63,8 +66,9 @@ def save_results(
 
         for thing in things:
             thing.plot_histogram(
-                data[thing.title],
+                data[thing.label],
                 metadata,
+                title,
                 os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
             )
 
@@ -99,5 +103,10 @@ if __name__ == "__main__":
 
         metadata = generate_metadata(config.get_dataset(None))
         save_results(
-            output_dir, args.extension, config.get_things_to_plot(), metadata, results
+            output_dir,
+            args.extension,
+            config.name,
+            config.get_things_to_plot(),
+            metadata,
+            results,
         )

@@ -37,7 +37,7 @@ class MyProcessor(ProcessorABC):
         result = {}
         for thing in self.config.get_things_to_plot():
             histogram = thing.create_histogram()
-            result[thing.title] = thing.fill_histogram(
+            result[thing.label] = thing.fill_histogram(
                 histogram, events, dataset, weights, **extra_args
             )
 
