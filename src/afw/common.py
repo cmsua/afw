@@ -67,7 +67,7 @@ def plot_thing(
     # pairs_sorted = sorted(pairs, key=lambda pair: pair[1].sum().value, reverse=True)
     # stacked_keys, stacked_histos = list(zip(*pairs_sorted))
 
-    fig, (ax_main, ax_comparison) = hep.subplots(nrows=2)
+    fig, (ax_main, ax_comparison, ax_comparison_2) = hep.subplots(nrows=3)
     hep.comp.data_model(
         data,
         stacked_components=stacked_histos,
@@ -83,11 +83,23 @@ def plot_thing(
         ylabel=f"Counts / {min(stacked_histos[0].axes[0].widths):.0f} {units}",
     )
 
+    # Add Signal
     for signal_key in signal_keys:
         hep.histplot(histogram[signal_key, :], ax=ax_main, label=signal_key, color="#000000")
 
-    ax_main.set_yscale("log")
+    # Add Second Comp
+    hep.comp.comparison(
+        data,
+        sum(stacked_histos),
+        ax_comparison_2,
+        comparison="relative_difference"
+    )
 
+
+    # Log Scale
+    # ax_main.set_yscale("log")
+
+    # Label
     hep.cms.label(
         "Preliminary", data=True, ax=ax_main, year="2022EE", lumi="26.7", com=13.6
     )
