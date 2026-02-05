@@ -107,7 +107,7 @@ def get_common_args():
     parser = argparse.ArgumentParser("Analysis FrameWork (UA)")
 
     # Analysis settings
-    parser.add_argument("-c", "--config", help="The config file to load", type=str)
+    parser.add_argument("config", help="The config file to load", type=str)
     parser.add_argument(
         "-S",
         "--skim_dir",
