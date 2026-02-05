@@ -126,8 +126,7 @@ if __name__ == "__main__":
                 args.xrd_redirector,
                 output_dir,
                 skim_dir_root,
-                runner,
-                not args.skip_repartition
+                runner
             )
     finally:
         client.close()
