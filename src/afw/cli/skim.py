@@ -63,6 +63,7 @@ def handle_config(
     skim_dir: str,
     run_combined: bool = False,
     skip_bad_files: bool = False,
+    n_to_one: int = 15,
 ) -> None:
     """Create and save skims for a given :class:`objects.AnalysisConfig`
 
@@ -72,6 +73,7 @@ def handle_config(
         skim_dir (str): The output directory for skims
         run_combined (bool, default False): Whether to submit preprocessing and skimming to the Dask Client as one compute or to run each dataset in series
         skip_bad_files (bool, default False): Whether or not to skip bad files in the dataset
+        n_to_one (int, default 15): If non-negative, the n_to_one value to use when repartitioning
     """
     # Load dataset, with preskims if needed
     my_dataset = config.get_dataset(xrd_redirector)
@@ -143,9 +145,10 @@ def handle_config(
             )
 
         skimmed_writable = uproot_writeable(skimmed_dict[fileset_name])
-        skimmed_writable = skimmed_writable.repartition(
-            n_to_one=15,
-        )  # Reparititioning so that output file contains ~100_000 eventspartition
+        if n_to_one > 0:
+            skimmed_writable = skimmed_writable.repartition(
+                n_to_one=n_to_one,
+            )  # Reparititioning so that output file contains ~100_000 eventspartition
 
         # Output directory
         destination = os.path.join(
@@ -176,6 +179,13 @@ if __name__ == "__main__":
         action="store_true",
         help="Compute each dataset in parallel rather than in series",
     )
+    parser.add_argument(
+        "-n",
+        "--n-to-one",
+        default=15,
+        type=int,
+        help="The number of input files to one output file",
+    )
     args = parser.parse_args()
 
     # Setup Logging
@@ -201,6 +211,7 @@ if __name__ == "__main__":
                 skim_dir,
                 args.parallel,
                 skip_bad_files=not args.debug,
+                n_to_one=args.n_to_one,
             )
 
     finally:
