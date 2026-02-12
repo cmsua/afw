@@ -203,6 +203,8 @@ def run():
     )
     with_debug_and_config(skim_parser)
     with_dask_client(skim_parser)
+    with_skim_dir(skim_parser)
+    with_xcache_redirector(skim_parser)
     skim_parser.set_defaults(func=skim.call)
 
     # Merge Skims
