@@ -224,7 +224,7 @@ def run():
         func = args.func
         args.configs = utils.get_configs(args.config)
 
-        func(**args)
+        func(**vars(args))
     finally:
         if "client" in args:
             args.client.close()
