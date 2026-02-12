@@ -133,7 +133,8 @@ def call_subtr(
 
         data = {}
         for key in data_1.keys():
-            data[key] = data_1[key] - data_2[key]
+            # __isub__ not implemented
+            data[key] = data_1[key] + (-1 * data_2[key])
 
         metadata = generate_metadata(config.get_dataset(None))
         save_results(
