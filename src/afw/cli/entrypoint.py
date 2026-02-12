@@ -2,6 +2,7 @@ import argparse
 
 import dotenv
 import os
+import logging
 
 
 from . import merge_skims, plotter, runner, save_file_list, skim, utils
@@ -212,6 +213,10 @@ def run():
 
     # Run
     args = parser.parse_args()
+
+    if "func" not in args:
+        logging.critical("Invalid function!")
+        return
 
     # Logging
     utils.setup_logging(args.debug)
