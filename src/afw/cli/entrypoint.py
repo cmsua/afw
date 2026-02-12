@@ -142,6 +142,17 @@ def run():
     with_debug_and_config(plot_parser)
     plot_parser.set_defaults(func=plotter.call)
 
+    # Plot Difference
+    plot_diff_parser = subparsers.add_parser(
+        "plot_difference", help="Subtract two results and save the outcome plot"
+    )
+    with_output_dir(plot_diff_parser)
+    with_extension(plot_diff_parser)
+    with_debug_and_config(plot_diff_parser)
+    plot_diff_parser.add_argument("-i", "--input_dir_one", type=str, help="Input Directory 1")
+    plot_diff_parser.add_argument("-I", "--input_dir_two", type=str, help="Input Directory 2")
+    plot_diff_parser.set_defaults(func=plotter.call_subtr)
+
     # File List
     save_file_list_parser = subparsers.add_parser(
         "save_file_list",

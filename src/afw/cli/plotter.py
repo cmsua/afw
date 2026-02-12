@@ -104,3 +104,43 @@ def call(
             metadata,
             results,
         )
+
+def call_subtr(
+    configs: list[AnalysisConfig],
+    output_dir: str,
+    input_dir_one: str,
+    input_dir_two: str,
+    extension: str,
+    **kwargs: dict,
+):
+    """
+    Call this subcommand from the CLI
+
+    Params:
+        configs (list[afw.objects.AnalysisConfig]): The configs to skim
+        output_dir (str): The directory to write plots to
+        input_dir_one (str): The first of two input directories
+        input_dir_two (str): The first of two input directories
+        extension (str): The file extension to use for plots
+        **kwargs (dict): Any additional arguments
+    """
+    # Run on channel(s)
+    for config in configs:
+        with open(os.path.join(input_dir_one, config.name, "results.pkl"), "rb") as file:
+            data_1 = pickle.load(file)
+        with open(os.path.join(input_dir_two, config.name, "results.pkl"), "rb") as file:
+            data_2 = pickle.load(file)
+
+        data = {}
+        for key in data_1.keys():
+            data[key] = data_1[key] - data_2[key]
+
+        metadata = generate_metadata(config.get_dataset(None))
+        save_results(
+            os.path.join(output_dir, config.name),
+            extension,
+            config.name,
+            config.get_things_to_plot(),
+            metadata,
+            data,
+        )
