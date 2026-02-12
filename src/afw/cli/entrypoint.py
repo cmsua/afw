@@ -59,7 +59,7 @@ def with_xcache_redirector(parser: argparse.ArgumentParser, required: bool = Fal
         "-x",
         "--xrd_redirector",
         help="XRootD Redirector for all data/mc files",
-        default=os.environ.get("XCACHE_HOST", "root://cms-xrd-global.cern.ch/"),
+        default="root://" + os.environ.get("XCACHE_HOST", "cms-xrd-global.cern.ch") + "/",
         required=required,
     )
 
