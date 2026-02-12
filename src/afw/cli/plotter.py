@@ -49,6 +49,8 @@ def save_results(
         metadata (dict): The metadata for plotting
         data (dict): The object containing histograms
     """
+    os.makedirs(output_dir, exist_ok=True)
+
     # Actually plot
     # Try running with joblib
     try:
