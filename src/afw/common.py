@@ -98,7 +98,7 @@ def plot_thing(
 
 
     # Log Scale
-    # ax_main.set_yscale("log")
+    ax_main.set_yscale("log")
     ax_main.set_title(title)
 
     # Label
