@@ -7,11 +7,14 @@ import time
 
 from coffea.nanoevents import NanoAODSchema
 from coffea.processor import DaskExecutor, Runner
+from dask.distributed import Client
 
 from .. import dataset
 from ..objects import AnalysisConfig
 from ..processor import MyProcessor
-from . import plotter, utils
+from . import plotter
+
+logger = logging.getLogger("Runtime")
 
 
 def handle_channel(
@@ -19,7 +22,7 @@ def handle_channel(
     xrd_redirector: str,
     output_dir: str,
     skim_dir_root: str,
-    runner: Runner
+    runner: Runner,
 ) -> None:
     """Create and save plots for a given :class:`objects.AnalysisConfig`
 
@@ -81,52 +84,38 @@ def handle_channel(
     )
 
 
-if __name__ == "__main__":
-    # Setup Args
-    parser = utils.get_common_args()
+def call(
+    client: Client,
+    configs: list[AnalysisConfig],
+    skim_dir: str,
+    xrd_redirector: str,
+    debug: bool,
+    output_dir: str,
+    **kwargs: dict,
+):
+    """
+    Call this subcommand from the CLI
 
-    # Intermediates
-    parser.add_argument(
-        "-o", "--output_dir", default="plots", help="Directory in which to save plots"
+    Params:
+        client (dask.distributed.Client): The dask client to use
+        configs (list[afw.objects.AnalysisConfig]): The configs to skim
+        skim_dir (str): The output directory (absolute path) to write to
+        xrd_redirector (str): The input xrootd redirector
+        debug (bool): Whether to use debug mode (crash on bad file rather than skip)
+        output_dir (str): The directory to write plots to
+        **kwargs (dict): Any additional arguments
+    """
+
+    # Create runner
+    runner = Runner(
+        DaskExecutor(client=client, compression=None),
+        chunksize=500_000,
+        # maxchunks=10,
+        skipbadfiles=not debug,
+        schema=NanoAODSchema,
+        savemetrics=True,
     )
 
-    args = parser.parse_args()
-
-    # Setup Logging
-    utils.setup_logging(args.debug)
-
-    logger = logging.getLogger("Main")
-    logger.info("Loaded Program and Arguments")
-
-    output_dir = os.path.expanduser(args.output_dir)
-    logger.info(f"Writing to output dir {output_dir}")
-
-    skim_dir = os.path.expanduser(args.skim_dir)
-    logger.info(f"Reading from skim dir {skim_dir}")
-
-    # Get Dask Client
-    client = utils.create_dask_client(args.cluster_address, [args.config])
-    skim_dir_root = os.path.expanduser(args.skim_dir)
-
-    try:
-        # Create runner
-        runner = Runner(
-            DaskExecutor(client=client, compression=None),
-            chunksize=500_000,
-            # maxchunks=10,
-            skipbadfiles=not args.debug,
-            schema=NanoAODSchema,
-            savemetrics=True,
-        )
-
-        # Run on channel
-        for config in utils.get_configs(args.config):
-            handle_channel(
-                config,
-                args.xrd_redirector,
-                output_dir,
-                skim_dir_root,
-                runner
-            )
-    finally:
-        client.close()
+    # Run on channel
+    for config in configs:
+        handle_channel(config, xrd_redirector, output_dir, skim_dir, runner)

@@ -46,6 +46,9 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.scripts]
+afw = "afw.cli.entrypoint:run"
+
 [project.urls]
 Homepage = "https://github.com/cmsua/afw"
 

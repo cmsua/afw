@@ -4,8 +4,10 @@ import logging
 import os
 import pickle
 
+from dask.distributed import Client
+
+from ..objects import AnalysisConfig, ThingToPlot
 from . import utils
-from ..objects import ThingToPlot
 
 logger = logging.getLogger("Main")
 
@@ -72,39 +74,31 @@ def save_results(
                 os.path.join(output_dir, f"{thing.escaped_name}.{extension}"),
             )
 
+def call(
+    configs: list[AnalysisConfig],
+    output_dir: str,
+    extension: str,
+    **kwargs: dict,
+):
+    """
+    Call this subcommand from the CLI
 
-if __name__ == "__main__":
-    # Setup Args
-    parser = utils.get_common_args()
-
-    # Intermediates
-    parser.add_argument(
-        "-o", "--output_dir", default="plots", help="Directory in which to save plots"
-    )
-    parser.add_argument(
-        "-e", "--extension", default="png", help="Format in which to save plots"
-    )
-
-    args = parser.parse_args()
-
-    # Setup Logging
-    utils.setup_logging(args.debug)
-
-    logger.info("Loaded Program and Arguments")
-
-    # Get Dask Client
-    logger.info("Creating & Saving Plots")
-
+    Params:
+        configs (list[afw.objects.AnalysisConfig]): The configs to skim
+        output_dir (str): The directory to write plots to
+        extension (str): The file extension to use for plots
+        **kwargs (dict): Any additional arguments
+    """
     # Run on channel(s)
-    for config in utils.get_configs(args.config):
-        output_dir = os.path.join(args.output_dir, config.name)
+    for config in configs:
+        output_dir = os.path.join(output_dir, config.name)
         with open(os.path.join(output_dir, "results.pkl"), "rb") as file:
             results = pickle.load(file)
 
         metadata = generate_metadata(config.get_dataset(None))
         save_results(
             output_dir,
-            args.extension,
+            extension,
             config.name,
             config.get_things_to_plot(),
             metadata,

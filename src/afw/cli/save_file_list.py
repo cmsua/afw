@@ -3,54 +3,41 @@ import logging
 import yaml
 
 from .. import dataset
-from . import utils
+from ..objects import AnalysisConfig
 
-if __name__ == "__main__":
-    # Setup Args
-    parser = utils.get_common_args()
 
-    # Intermediates
-    parser.add_argument(
-        "-o",
-        "--output_file",
-        default="files.txt",
-        help="Save all files to copy to this file",
-    )
-    parser.add_argument(
-        "-s",
-        "--output_file_sorted",
-        default="files_sorted.txt",
-        help="Save all files (sorted) to copy to this file",
-    )
-    parser.add_argument(
-        "-O",
-        "--output_file_full",
-        default="dataset.yaml",
-        help="Save a copy of the dataset to this file",
-    )
+def call(
+    configs: list[AnalysisConfig],
+    xrd_redirector: str,
+    dataset_name: str,
+    output_file: str,
+    output_file_sorted: str,
+    output_file_full: str,
+    **kwargs: dict,
+):
+    """
+    Call this subcommand from the CLI
 
-    parser.add_argument(
-        "-D",
-        "--dataset",
-        help="Save only a given dataset",
-        type=list
-    )
-
-    args = parser.parse_args()
-
-    # Setup Logging
-    utils.setup_logging(args.debug)
+    Params:
+        configs (list[afw.objects.AnalysisConfig]): The configs to save (length 1 required)
+        xrd_redirector (str): The input xrootd redirector
+        dataset_name (str): The name of the dataset to keep
+        output_file (str): The output file containing all remote files
+        output_file_sorted (str): The output file containing all remote files, picked from each dataset in a round-robin order
+        output_file_full (str): The yaml file containing all metadata
+        **kwargs (dict): Any additional arguments
+    """
 
     logger = logging.getLogger("Main")
     logger.info("Loaded Program and Arguments")
 
-    config = utils.get_configs(args.config)[0]
-    my_fileset = config.get_dataset(args.xrd_redirector)
+    config = configs[0]
+    my_fileset = config.get_dataset(xrd_redirector)
 
     # Use dataset arg if needed
-    if args.dataset:
+    if dataset_name:
         for key in my_fileset:
-            if key not in args.dataset:
+            if key not in dataset_name:
                 del my_fileset[key]
 
     dataset.print_summary(my_fileset, logger)
@@ -59,7 +46,7 @@ if __name__ == "__main__":
     files_all = sum(files, [])
 
     # Save Files
-    with open(args.output_file, "w") as file:
+    with open(output_file, "w") as file:
         file.writelines([f"{line}\n" for line in files_all])
 
     # Save Files Sorted
@@ -69,12 +56,12 @@ if __name__ == "__main__":
             if i >= len(file_list):
                 continue
             files_ord += [file_list[i]]
-    with open(args.output_file_sorted, "w") as file:
+    with open(output_file_sorted, "w") as file:
         file.writelines([f"{line}\n" for line in files_ord])
 
     # Delete keys for preview
     for key in my_fileset:
         del my_fileset[key]["files"]
     # Debug
-    with open(args.output_file_full, "w") as file:
+    with open(output_file_full, "w") as file:
         yaml.dump(my_fileset, file)

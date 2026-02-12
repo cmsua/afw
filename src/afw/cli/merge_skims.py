@@ -7,6 +7,7 @@ import subprocess
 from ..objects import AnalysisConfig
 from . import utils
 
+logger = logging.getLogger("Skims (Merge)")
 ## SOURCE: https://github.com/scikit-hep/coffea/discussions/1100
 
 
@@ -32,7 +33,8 @@ def merge_skims(config: AnalysisConfig, skim_dir: str) -> None:
     # Make output dir
     os.makedirs(merged_dir, exist_ok=True)
 
-    # Actually merge
+    # Create merge commands
+    commands = []
     for fileset in dirs:
         # List dir, check for non-empty
         fileset_path = os.path.join(skim_dir_config, fileset)
@@ -51,29 +53,44 @@ def merge_skims(config: AnalysisConfig, skim_dir: str) -> None:
             os.path.join(fileset_path, part) for part in sorted(parts)
         ]
 
-        logger.debug(f"Running command {command}")
-        out = subprocess.run(command)
+        logger.Appending(f"Running command {command}")
+        commands += [command]
+
+    # Run Commands
+    try:
+        import joblib
+
+        outs = joblib.Parallel(n_jobs=-2)(
+            joblib.delayed(subprocess.run)(command) for command in commands
+        )
+    except ImportError:
+        logger.warning("Joblib not found - Merging synchronously")
+
+        outs = []
+        for command in commands:
+            outs += [subprocess.run(command)]
+
+    for out in outs:
         if out.returncode != 0:
-            logger.critical(f"hadd returned with non-zero return code {out}")
+            logger.critical(f"hadd returned with non-zero return code {out.returncode}: {out}")
 
 
-if __name__ == "__main__":
-    # Setup Args
-    parser = utils.get_common_args()
-    args = parser.parse_args()
+def call(
+    configs: list[AnalysisConfig],
+    skim_dir: str,
+    **kwargs: dict,
+):
+    """
+    Call this subcommand from the CLI
 
-    # Setup Logging
-    utils.setup_logging(args.debug)
-
-    logger = logging.getLogger("Main")
-    logger.info("Loaded program")
-
-    # Create output dir
-    skim_dir = os.path.expanduser(args.skim_dir)
-    logger.info(f"Writing to skim dir {skim_dir}")
+    Params:
+        configs (list[afw.objects.AnalysisConfig]): The configs to skim
+        skim_dir (str): The output directory (absolute path) to write to
+        **kwargs (dict): Any additional arguments
+    """
 
     # Run on channel(s)
-    for config in utils.get_configs(args.config):
+    for config in configs:
         logger.info(f"Handling config {config}")
         merge_skims(
             config,

@@ -1,13 +1,10 @@
 """
 Utilities for CLI tools
 """
-
-import argparse
 import importlib.util
 import logging
 import os
 import sys
-import inspect
 from dask.distributed import Client
 
 from ..objects import AnalysisConfig
@@ -76,68 +73,6 @@ def create_dask_client(cluster_address: str, upload_files: list[str] = []):
     logger.info(f"Dashboard located at {client.dashboard_link}")
     return client
 
-
-# Root Host
-def get_xrd_redirector():
-    """
-    Returns an xcache redirector. Defaults to the CMS Global Redirector if XCache cannot be detected.
-
-    Returns:
-        str: The local XCache redirector, or the CMS Global Redirector if not present
-    """
-    if "XCACHE_HOST" not in os.environ:
-        return "root://cms-xrd-global.cern.ch/"
-    return f"root://{os.environ['XCACHE_HOST']}/"
-
-
-# Common Args
-def get_common_args():
-    """
-    Load common arguments for CLI programs. Currently supports:
-    - channel selection
-    - skim directory specification
-    - fileset root for non-skimmed files
-    - debug mode
-    """
-    import dotenv
-
-    dotenv.load_dotenv()
-
-    # Setup Args
-    parser = argparse.ArgumentParser("Analysis FrameWork (UA)")
-
-    # Analysis settings
-    parser.add_argument("config", help="The config file to load", type=str)
-    parser.add_argument(
-        "-S",
-        "--skim_dir",
-        help="Base path for reading names of data/mc files",
-        default=os.environ.get("SKIM_LOCATION", "skims"),
-    )
-
-    # Environment settings
-    parser.add_argument(
-        "-C",
-        "--cluster-address",
-        help="Cluster to use for processing",
-        default=os.environ.get("CLUSTER_ADDRESS", "tls://localhost:8786"),
-    )
-    parser.add_argument(
-        "-x",
-        "--xrd_redirector",
-        help="XRootD Redirector for all data/mc files",
-        default=get_xrd_redirector(),
-    )
-
-    # Debug
-    parser.add_argument(
-        "-d",
-        "--debug",
-        default=False,
-        action="store_true",
-        help="Enable verbose logging",
-    )
-    return parser
 
 
 # Get config from ee, emu, mumu, or common (common is only used for skimming)

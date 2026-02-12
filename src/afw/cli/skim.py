@@ -9,12 +9,15 @@ import dask_awkward as dak
 import uproot
 from coffea.dataset_tools import apply_to_fileset, preprocess
 from coffea.nanoevents import NanoAODSchema
+from dask.distributed import Client
 
-from ..objects import AnalysisConfig
-from . import utils
 from ..dataset import print_summary, skimmed
+from ..objects import AnalysisConfig
 
 ## SOURCE: https://github.com/scikit-hep/coffea/discussions/1100
+
+logger = logging.getLogger("Main")
+logger.info("Loaded program")
 
 
 def is_rootcompat(a: ak.Array) -> bool:
@@ -170,49 +173,37 @@ def handle_config(
         dask.compute(*to_run)
 
 
-if __name__ == "__main__":
-    # Setup Args
-    parser = utils.get_common_args()
-    parser.add_argument(
-        "-p",
-        "--parallel",
-        action="store_true",
-        help="Compute each dataset in parallel rather than in series",
-    )
-    parser.add_argument(
-        "-n",
-        "--n-to-one",
-        default=15,
-        type=int,
-        help="The number of input files to one output file",
-    )
-    args = parser.parse_args()
+def call(
+    client: Client,
+    configs: list[AnalysisConfig],
+    skim_dir: str,
+    xrd_redirector: str,
+    debug: bool,
+    parallel: bool,
+    n_to_one: int,
+    **kwargs: dict,
+):
+    """
+    Call this subcommand from the CLI
 
-    # Setup Logging
-    utils.setup_logging(args.debug)
-
-    logger = logging.getLogger("Main")
-    logger.info("Loaded program")
-
-    # Create output dir
-    skim_dir = os.path.expanduser(args.skim_dir)
-    logger.info(f"Writing to skim dir {skim_dir}")
-
-    # Get Dask Client
-    client = utils.create_dask_client(args.cluster_address, [args.config])
-
-    try:
-        # Run on channel(s)
-        for config in utils.get_configs(args.config):
-            logger.info(f"Handling config {config}")
-            handle_config(
-                config,
-                args.xrd_redirector,
-                skim_dir,
-                args.parallel,
-                skip_bad_files=not args.debug,
-                n_to_one=args.n_to_one,
-            )
-
-    finally:
-        client.close()
+    Params:
+        client (dask.distributed.Client): The dask client to use
+        configs (list[afw.objects.AnalysisConfig]): The configs to skim
+        skim_dir (str): The output directory (absolute path) to write to
+        xrd_redirector (str): The input xrootd redirector
+        debug (bool): Whether to use debug mode (crash on bad file rather than skip)
+        parallel (bool): Whether to run each dataset in parallel
+        n_to_one (int): The number of files to be combined into one
+        **kwargs (dict): Any additional arguments
+    """
+    # Run on channel(s)
+    for config in configs:
+        logger.info(f"Handling config {config}")
+        handle_config(
+            config,
+            xrd_redirector,
+            skim_dir,
+            parallel,
+            skip_bad_files=not debug,
+            n_to_one=n_to_one,
+        )
