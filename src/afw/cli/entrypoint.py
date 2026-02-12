@@ -202,6 +202,7 @@ def run():
         help="The number of input files to one output file",
     )
     with_debug_and_config(skim_parser)
+    with_dask_client(skim_parser)
     skim_parser.set_defaults(func=skim.call)
 
     # Merge Skims
