@@ -52,7 +52,7 @@ def merge_skims(config: AnalysisConfig, skim_dir: str) -> None:
             os.path.join(fileset_path, part) for part in sorted(parts)
         ]
 
-        logger.Appending(f"Running command {command}")
+        logger.debug(f"Running command {command}")
         commands += [command]
 
     # Run Commands
