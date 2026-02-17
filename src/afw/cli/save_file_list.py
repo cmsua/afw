@@ -35,7 +35,7 @@ def call(
     my_fileset = config.get_dataset(xrd_redirector)
 
     # Use dataset arg if needed
-    if dataset_name:
+    if dataset_name is not None:
         for key in my_fileset:
             if key not in dataset_name:
                 del my_fileset[key]

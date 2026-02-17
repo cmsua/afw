@@ -178,8 +178,9 @@ def run():
         help="Save a copy of the dataset to this file",
     )
     save_file_list_parser.add_argument(
-        "-D", "--dataset", help="Save only a given dataset", type=list
+        "-D", "--dataset-name", help="Save only a given dataset", type=list
     )
+    with_xcache_redirector(save_file_list_parser)
     with_debug_and_config(save_file_list_parser)
     save_file_list_parser.set_defaults(func=save_file_list.call)
 
