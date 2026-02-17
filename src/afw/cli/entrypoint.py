@@ -132,6 +132,19 @@ def run():
     with_output_dir(run_parser)
     with_extension(run_parser)
     with_debug_and_config(run_parser)
+    run_parser.add_argument(
+        "-n",
+        "--n-files",
+        type=int,
+        help="The number of input files allowed in each fileset",
+    )
+    run_parser.add_argument(
+        "-c",
+        "--chunksize",
+        type=int,
+        default=500_000,
+        help="The chunk size to use when processing data"
+    )
     run_parser.set_defaults(func=runner.call)
 
     # Plot

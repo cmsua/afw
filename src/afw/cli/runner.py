@@ -5,6 +5,7 @@ import os
 import pickle
 import time
 
+from coffea.dataset_tools import max_files
 from coffea.nanoevents import NanoAODSchema
 from coffea.processor import DaskExecutor, Runner
 from dask.distributed import Client
@@ -22,6 +23,7 @@ def handle_channel(
     xrd_redirector: str,
     output_dir: str,
     skim_dir_root: str,
+    n_files: int,
     runner: Runner,
 ) -> None:
     """Create and save plots for a given :class:`objects.AnalysisConfig`
@@ -31,6 +33,7 @@ def handle_channel(
         xrd_redirector (str): The host of the XRootD Redirector to use
         output_dir (str): The output directory for plots
         skim_dir_root (str): The input directory for skims
+        n_files (int): If not None, the amount of files to limit to
         runner (coffea.processor.Runner): The Coffea runner to use
     """
     logger.info(f"Handling channel {config.name}")
@@ -47,6 +50,10 @@ def handle_channel(
             f"Skim directory {skim_dir} does not exist, running from raw files..."
         )
         skim_dir = None
+
+    if n_files is not None:
+        my_dataset = max_files(my_dataset, n_files)
+        logger.critical(f"Limited to {n_files} files per fileset!")
 
     # Print
     dataset.print_summary(my_dataset, logger, use_short_name=False)
@@ -90,6 +97,8 @@ def call(
     skim_dir: str,
     xrd_redirector: str,
     debug: bool,
+    n_files: int,
+    chunksize: int,
     output_dir: str,
     **kwargs: dict,
 ):
@@ -102,6 +111,8 @@ def call(
         skim_dir (str): The output directory (absolute path) to write to
         xrd_redirector (str): The input xrootd redirector
         debug (bool): Whether to use debug mode (crash on bad file rather than skip)
+        n_files (int): If not None, the amount of files to limit to
+        chunksize (int): The max chunk size allowed per worker
         output_dir (str): The directory to write plots to
         **kwargs (dict): Any additional arguments
     """
@@ -109,7 +120,7 @@ def call(
     # Create runner
     runner = Runner(
         DaskExecutor(client=client, compression=None),
-        chunksize=500_000,
+        chunksize=chunksize,
         # maxchunks=10,
         skipbadfiles=not debug,
         schema=NanoAODSchema,
@@ -118,4 +129,4 @@ def call(
 
     # Run on channel
     for config in configs:
-        handle_channel(config, xrd_redirector, output_dir, skim_dir, runner)
+        handle_channel(config, xrd_redirector, output_dir, skim_dir, n_files, runner)
