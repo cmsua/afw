@@ -39,7 +39,9 @@ def handle_channel(
     logger.info(f"Handling channel {config.name}")
 
     # Load dataset, with preskims if needed
-    my_dataset = config.get_dataset(xrd_redirector)
+    my_dataset = config.get_dataset(xrd_redirector, n_files)
+    if n_files is not None:
+        logger.critical(f"Limited to {n_files} files per fileset!")
 
     # Check for skims
     skim_dir = os.path.abspath(os.path.join(skim_dir_root, config.name))
@@ -50,10 +52,6 @@ def handle_channel(
             f"Skim directory {skim_dir} does not exist, running from raw files..."
         )
         skim_dir = None
-
-    if n_files is not None:
-        my_dataset = max_files(my_dataset, n_files)
-        logger.critical(f"Limited to {n_files} files per fileset!")
 
     # Print
     dataset.print_summary(my_dataset, logger, use_short_name=False)
