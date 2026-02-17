@@ -5,7 +5,6 @@ import os
 import subprocess
 
 from ..objects import AnalysisConfig
-from . import utils
 
 logger = logging.getLogger("Skims (Merge)")
 ## SOURCE: https://github.com/scikit-hep/coffea/discussions/1100

@@ -212,6 +212,7 @@ def run():
         "merge_skims", help="Merge skims into single files"
     )
     with_debug_and_config(merge_skim_parser)
+    with_skim_dir(merge_skim_parser)
     merge_skim_parser.set_defaults(func=merge_skims.call)
 
     # Run
