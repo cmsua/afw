@@ -81,7 +81,7 @@ def remove_obsolete_versions(dataset: dict) -> dict:
     return dataset
 
 
-def build_datasets(defs, xcache_host: str = None) -> dict:
+def build_datasets(defs, xcache_host: str = None, max_files: int = None) -> dict:
     # Actually load from Rucio
     result = {}
     # Convert to filesets (aka das keys)
@@ -95,6 +95,7 @@ def build_datasets(defs, xcache_host: str = None) -> dict:
 
         nevents = 0
         files = {}
+        num_files = 0
         # Parse dasgoclient results
         for entry in response:
             if len(entry["file"]) != 1:
@@ -118,12 +119,15 @@ def build_datasets(defs, xcache_host: str = None) -> dict:
             file_path = (
                 xcache_host + file["name"] if xcache_host is not None else file["name"]
             )
+
             files[file_path] = "Events"
 
+            num_files += 1
             nevents += file["nevents"]
 
-        val["metadata"]["nevents"] = nevents
-        val["files"] = files
+            # Break if at cap
+            if max_files is not None and num_files == max_files:
+                break
 
     result = remove_obsolete_versions(result)
 
