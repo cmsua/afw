@@ -129,6 +129,9 @@ def build_datasets(defs, xcache_host: str = None, max_files: int = None) -> dict
             if max_files is not None and num_files == max_files:
                 break
 
+        val["metadata"]["nevents"] = nevents
+        val["files"] = files
+
     result = remove_obsolete_versions(result)
 
     # Check for empty
