@@ -1,0 +1,255 @@
+ChargedHiggsToWZTo3LNu_M300_13TeV-madgraph-pythia8: !!python/tuple
+- - DAS: /ChargedHiggsToWZTo3LNu_M300_13TeV-madgraph-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM
+    MCM: SMP-RunIISummer16MiniAODv2-00264
+    _id:
+      $oid: 5a268b37f20ea5766a5d29c7
+    accuracy: LO
+    approvedBy: perrozzi
+    comments: Automatically computed
+    createdBy: cmsxsec
+    createdOn: '2017-12-05 12:04:07'
+    cross_section: '0.5383'
+    energy: '13'
+    equivalent_lumi: '1858.0'
+    fraction_negative_weight: '0.0'
+    modifiedBy: perrozzi
+    modifiedOn: '2017-12-06 20:55:37'
+    mtrx_gen: Madgraph
+    process_name: ChargedHiggsToWZTo3LNu_M300_13TeV-madgraph-pythia8
+    shower: Pythia8
+    status: approved
+    total_uncertainty: '0.0003038'
+- 200
+EGamma: !!python/tuple
+- - DAS: /VectorZPrimeGamma_flat_v2_GpT90_TuneCP5_13TeV_madgraph-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM
+    MCM: EXO-RunIISummer20UL18MiniAODv2-04878
+    _id:
+      $oid: 65d62fb1c9012c0064569fe4
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: dawei.fu@cern.ch
+    createdOn: '2024-02-21 17:15:29'
+    cross_section: 0.01744
+    energy: '13'
+    equivalent_lumi: 57330.0
+    fraction_negative_weight: 0.0
+    matrix_generator: Madgraph
+    modifiedBy: dawei.fu@cern.ch
+    modifiedOn: '2024-02-21 17:15:29'
+    process_name: VectorZPrimeGamma_flat_v2_GpT90_TuneCP5_13TeV_madgraph-pythia8
+    shower: none
+    status: new
+    total_uncertainty: 2.825e-05
+  - DAS: /VectorZPrimeGamma_flat_GpT75_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM
+    MCM: EXO-RunIISummer20UL17MiniAODv2-03926
+    _id:
+      $oid: 63ea2c442946177d33a78f87
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: yuzhe
+    createdOn: '2023-02-13 12:25:40'
+    cross_section: '3473.0'
+    energy: '13'
+    equivalent_lumi: '0.2879'
+    fraction_negative_weight: '0.0'
+    matrix_generator: Madgraph
+    modifiedBy: yuzhe
+    modifiedOn: '2023-02-13 12:25:40'
+    process_name: VectorZPrimeGamma_flat_GpT75_TuneCP5_13TeV-madgraphMLM-pythia8
+    shower: Pythia8
+    status: new
+    total_uncertainty: '25.3'
+  - DAS: /VectorZPrimeGammaToQQGamma_flat_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM
+    MCM: EXO-RunIISummer20UL17MiniAODv2-00865
+    _id:
+      $oid: 63ea2c432946177d33a78f86
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: yuzhe
+    createdOn: '2023-02-13 12:25:39'
+    cross_section: '0.2305'
+    energy: '13'
+    equivalent_lumi: '4339.0'
+    fraction_negative_weight: '0.0'
+    matrix_generator: Madgraph
+    modifiedBy: yuzhe
+    modifiedOn: '2023-02-13 12:25:39'
+    process_name: VectorZPrimeGammaToQQGamma_flat_TuneCP5_13TeV-madgraph-pythia8
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.0005285'
+  - DAS: /VectorZPrimeGammaToQQGamma_flat_13TeV_madgraph_pythia8_TuneCP5/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM
+    MCM: EXO-RunIIFall17MiniAODv2-03777
+    _id:
+      $oid: 5f6d76cef368571e6ae3d5b7
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: sdeng
+    createdOn: '2020-09-25 04:49:18'
+    cross_section: '0.2238'
+    energy: '13'
+    equivalent_lumi: '4059.0'
+    fraction_negative_weight: '0.0235'
+    matrix_generator: Madgraph
+    modifiedBy: sdeng
+    modifiedOn: '2020-09-25 04:49:18'
+    process_name: VectorZPrimeGammaToQQGamma_flat_13TeV_madgraph_pythia8_TuneCP5
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.0002078'
+  - DAS: /VectorZPrimeGammaToQQGamma_M75_GpT75_TuneCP5_madgraph_pythia8_13TeV/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM
+    MCM: EXO-RunIIAutumn18MiniAOD-02810
+    _id:
+      $oid: 5f819fa8f368571e6ae3ea82
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: sdeng
+    createdOn: '2020-10-10 11:48:56'
+    cross_section: '2.96'
+    energy: '13'
+    equivalent_lumi: '337.3'
+    fraction_negative_weight: '0.0003764'
+    matrix_generator: Madgraph
+    modifiedBy: sdeng
+    modifiedOn: '2020-10-10 11:48:56'
+    process_name: VectorZPrimeGammaToQQGamma_M75_GpT75_TuneCP5_madgraph_pythia8_13TeV
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.00695'
+  - DAS: /VectorZPrimeGammaToQQGamma_M50_GpT75_TuneCP5_madgraph_pythia8_13TeV/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM
+    MCM: EXO-RunIIAutumn18MiniAOD-02806
+    _id:
+      $oid: 5f819fa7f368571e6ae3ea81
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: sdeng
+    createdOn: '2020-10-10 11:48:55'
+    cross_section: '4.098'
+    energy: '13'
+    equivalent_lumi: '243.6'
+    fraction_negative_weight: '0.0004475'
+    matrix_generator: Madgraph
+    modifiedBy: sdeng
+    modifiedOn: '2020-10-10 11:48:55'
+    process_name: VectorZPrimeGammaToQQGamma_M50_GpT75_TuneCP5_madgraph_pythia8_13TeV
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.009624'
+  - DAS: /VectorZPrimeGammaToQQGamma_M25_GpT75_TuneCP5_madgraph_pythia8_13TeV/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM
+    MCM: EXO-RunIIAutumn18MiniAOD-02802
+    _id:
+      $oid: 5f819fa6f368571e6ae3ea80
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: sdeng
+    createdOn: '2020-10-10 11:48:54'
+    cross_section: '7.639'
+    energy: '13'
+    equivalent_lumi: '130.7'
+    fraction_negative_weight: '0.0004096'
+    matrix_generator: Madgraph
+    modifiedBy: sdeng
+    modifiedOn: '2020-10-10 11:48:54'
+    process_name: VectorZPrimeGammaToQQGamma_M25_GpT75_TuneCP5_madgraph_pythia8_13TeV
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.01802'
+  - DAS: /VectorZPrimeGammaToQQGamma_M20_GpT75_TuneCP5_madgraph_pythia8_13TeV/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM
+    MCM: EXO-RunIIAutumn18MiniAOD-02799
+    _id:
+      $oid: 5f819fa6f368571e6ae3ea7f
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: sdeng
+    createdOn: '2020-10-10 11:48:54'
+    cross_section: '16.62'
+    energy: '13'
+    equivalent_lumi: '60.1'
+    fraction_negative_weight: '0.0002496'
+    matrix_generator: Madgraph
+    modifiedBy: sdeng
+    modifiedOn: '2020-10-10 11:48:54'
+    process_name: VectorZPrimeGammaToQQGamma_M20_GpT75_TuneCP5_madgraph_pythia8_13TeV
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.03925'
+  - DAS: /VectorZPrimeGammaToQQGamma_M150_GpT75_TuneCP5_madgraph_pythia8_13TeV/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM
+    MCM: EXO-RunIIAutumn18MiniAOD-02797
+    _id:
+      $oid: 5f819fa5f368571e6ae3ea7e
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: sdeng
+    createdOn: '2020-10-10 11:48:53'
+    cross_section: '1.509'
+    energy: '13'
+    equivalent_lumi: '661.7'
+    fraction_negative_weight: '0.0003974'
+    matrix_generator: Madgraph
+    modifiedBy: sdeng
+    modifiedOn: '2020-10-10 11:48:53'
+    process_name: VectorZPrimeGammaToQQGamma_M150_GpT75_TuneCP5_madgraph_pythia8_13TeV
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.003599'
+  - DAS: /VectorZPrimeGammaToQQGamma_M125_GpT75_TuneCP5_madgraph_pythia8_13TeV/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM
+    MCM: EXO-RunIIAutumn18MiniAOD-02796
+    _id:
+      $oid: 5f819fa5f368571e6ae3ea7d
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: sdeng
+    createdOn: '2020-10-10 11:48:53'
+    cross_section: '1.853'
+    energy: '13'
+    equivalent_lumi: '538.7'
+    fraction_negative_weight: '0.0003896'
+    matrix_generator: Madgraph
+    modifiedBy: sdeng
+    modifiedOn: '2020-10-10 11:48:53'
+    process_name: VectorZPrimeGammaToQQGamma_M125_GpT75_TuneCP5_madgraph_pythia8_13TeV
+    shower: Pythia8
+    status: new
+    total_uncertainty: '0.004404'
+- 200
+WtoLNu-4Jets_MLNu-120_HT-2500_TuneCP5_13p6TeV_madgraphMLM-pythia8: !!python/tuple
+- - DAS: /WtoLNu-4Jets_MLNu-120_HT-2500_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/MINIAODSIM
+    MCM: GEN-Run3Summer22EEMiniAODv4-00416
+    _id:
+      $oid: 65e2afc5c9012c00640bfa61
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: dawei.fu@cern.ch
+    createdOn: '2024-03-02 04:49:09'
+    cross_section: 0.0003788
+    energy: '13.6'
+    equivalent_lumi: 2640000.0
+    fraction_negative_weight: 0.0
+    matrix_generator: Madgraph
+    modifiedBy: dawei.fu@cern.ch
+    modifiedOn: '2024-03-02 04:49:09'
+    process_name: WtoLNu-4Jets_MLNu-120_HT-2500_TuneCP5_13p6TeV_madgraphMLM-pythia8
+    shower: none
+    status: new
+    total_uncertainty: 1.143e-06
+  - DAS: /WtoLNu-4Jets_MLNu-120_HT-2500_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/MINIAODSIM
+    MCM: GEN-Run3Summer22EEMiniAODv4-00416
+    _id:
+      $oid: 660db7bbeca3fd0064c515d9
+    accuracy: LO
+    comments: Automatically computed
+    createdBy: dawei.fu@cern.ch
+    createdOn: '2024-04-03 20:10:35'
+    cross_section: 0.0003788
+    energy: '13.6'
+    equivalent_lumi: 2640000.0
+    fraction_negative_weight: 0.0
+    matrix_generator: Madgraph
+    modifiedBy: dawei.fu@cern.ch
+    modifiedOn: '2024-04-03 20:10:35'
+    process_name: WtoLNu-4Jets_MLNu-120_HT-2500_TuneCP5_13p6TeV_madgraphMLM-pythia8
+    shower: none
+    status: new
+    total_uncertainty: 1.143e-06
+- 200
+_changed: true
