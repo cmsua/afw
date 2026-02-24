@@ -5,7 +5,6 @@ import os
 import pickle
 import time
 
-from coffea.dataset_tools import max_files
 from coffea.nanoevents import NanoAODSchema
 from coffea.processor import DaskExecutor, Runner
 from dask.distributed import Client
@@ -39,9 +38,10 @@ def handle_channel(
     logger.info(f"Handling channel {config.name}")
 
     # Load dataset, with preskims if needed
-    my_dataset = config.get_dataset(xrd_redirector, n_files)
+    my_dataset = config.get_dataset(n_files)
     if n_files is not None:
         logger.critical(f"Limited to {n_files} files per fileset!")
+    my_dataset = dataset.apply_xcache_host(my_dataset, xrd_redirector)
 
     # Check for skims
     skim_dir = os.path.abspath(os.path.join(skim_dir_root, config.name))

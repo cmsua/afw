@@ -11,7 +11,7 @@ from coffea.dataset_tools import apply_to_fileset, preprocess
 from coffea.nanoevents import NanoAODSchema
 from dask.distributed import Client
 
-from ..dataset import print_summary, skimmed
+from ..dataset import apply_xcache_host, print_summary, skimmed
 from ..objects import AnalysisConfig
 
 ## SOURCE: https://github.com/scikit-hep/coffea/discussions/1100
@@ -79,7 +79,8 @@ def handle_config(
         n_to_one (int, default 15): If non-negative, the n_to_one value to use when repartitioning
     """
     # Load dataset, with preskims if needed
-    my_dataset = config.get_dataset(xrd_redirector)
+    my_dataset = config.get_dataset()
+    my_dataset = apply_xcache_host(my_dataset, xrd_redirector)
 
     # Print
     print_summary(my_dataset, logger, use_short_name=False)

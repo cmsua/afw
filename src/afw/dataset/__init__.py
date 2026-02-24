@@ -3,6 +3,21 @@ from . import cached, definitions, skimmed
 import logging
 
 
+def apply_xcache_host(fileset: dict[str, dict[str, dict]], xcache_host: str) ->  dict[str, dict[str, dict]]:
+    """
+    Add the xcache_host to a dataset
+    """
+    result = {}
+    for das_key, section in fileset.items():
+        new_files = {}
+        for file, tree in section["files"].items():
+            new_files[xcache_host + file] = tree
+        section["files"] = new_files
+        result[das_key] = new_files
+    
+    return result
+
+
 def print_summary(
     fileset: dict[str, list[str]], logger: logging.Logger, use_short_name: bool = True
 ) -> None:

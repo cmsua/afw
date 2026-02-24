@@ -90,12 +90,11 @@ class AnalysisConfig(abc.ABC):
         self.name = name
 
     @abc.abstractmethod
-    def get_dataset(self, xcache_host: str, max_files: int = None) -> dict:
+    def get_dataset(self, max_files: int = None) -> dict:
         """
         Gets the fully-formatted dataset for the current analysis
 
         Args:
-            xcache_host (str): The address of the local xcache redirector, if present
             max_files (int, default None): The maximum amount of files per fileset to allow
         Returns:
             dict: A fully rendered dataset with a list of files and metadata

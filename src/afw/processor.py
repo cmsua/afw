@@ -1,12 +1,6 @@
 from coffea.processor import ProcessorABC
-from coffea.analysis_tools import Weights
 
 from .objects import AnalysisConfig
-
-import awkward as ak
-
-
-lumi22EE = 26.6717 * 1e3
 
 
 class MyProcessor(ProcessorABC):
