@@ -1,4 +1,4 @@
-from . import cached, definitions, local, skimmed
+from . import cached, definitions, skimmed
 
 import logging
 
@@ -38,4 +38,4 @@ def print_summary(
     for name, num in items:
         logger.info(f"{name.ljust(maxlen)} | {num:,}")
 
-__all__ = [print_summary, cached, definitions, local, skimmed]
+__all__ = [print_summary, cached, definitions, skimmed]
