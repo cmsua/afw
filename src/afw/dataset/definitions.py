@@ -43,16 +43,16 @@ def build_datasets(base: str | dict, max_files: int = None) -> dict[str, dict]:
         # Check for fails
         if len(section["files"]) == 0:
             logger.critical(
-                f"Fileset {das_key} (short name {section['metadata']['shortName']}) has zero files!"
+                f"Fileset has zero files: {das_key}"
             )
             continue
 
         # Populate xsec if needed
-        if section["metadata"].get("xsec", None) is None:
+        if section["metadata"].get("xsec", None) is None and not section["metadata"].get("isData", False):
             xsec = cached.get_cross_section(das_key)
             if xsec == 0:
                 logger.critical(f"Cross-section is zero for key {das_key}, skipping!")
-            continue
+                continue
             section["metadata"]["xsec"] = xsec
 
         # Save
@@ -198,5 +198,4 @@ def populate_files(das_key: str, section: dict = {}, max_files: int = None):
         # Save file, increment nevents
         section["files"][name] = "Events"
         section["metadata"]["nevents"] += file["nevents"]
-
     return section

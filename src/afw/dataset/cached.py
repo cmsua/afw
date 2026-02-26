@@ -247,5 +247,4 @@ def get_all_matching(das_template: str) -> list[dict]:
     return [
         it["dataset"][0]["name"]
         for it in response
-        if response["dataset"][0]["status"] == "VALID"
     ]

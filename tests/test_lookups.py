@@ -15,7 +15,7 @@ def test_xsecdb_lookup():
     result = result[0]
 
     assert result["_id"]["$oid"] == magic.single_xsecdb_oid
-    assert result["cross_section"] == str(magic.single_xsecdb_xsec)
+    assert result["cross_section"] == magic.single_xsecdb_xsec
 
 
 # Check one cross section
