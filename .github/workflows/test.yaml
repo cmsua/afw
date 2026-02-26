@@ -15,6 +15,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      # Build
+      - uses: actions/setup-python@v5
+      - name: Install dependencies
+        run: |
+          pip install -e .[dev]
       - name: Build release distributions
         run: |
           python -m pip install build
