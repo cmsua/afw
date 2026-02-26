@@ -1,6 +1,5 @@
 import argparse
 
-import dotenv
 import os
 import logging
 
@@ -116,7 +115,6 @@ def run():
     """
     Entrypoint for the CLI
     """
-    dotenv.load_dotenv()
 
     # Setup Args
     parser = argparse.ArgumentParser("Analysis FrameWork (UA)")

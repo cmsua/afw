@@ -59,9 +59,7 @@ dev = [
   "pydata-sphinx-theme",
 ]
 client = [
-  "dotenv",
   "pycurl",
-  "rucio",
   "joblib"
 ]
 
