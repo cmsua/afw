@@ -37,9 +37,6 @@ if os.path.exists(override_file):
 # Curl client
 c = None
 
-# Rucio client
-client = None
-
 cache_dir = os.path.join(os.curdir, "cache")
 
 
@@ -231,29 +228,24 @@ def get_cross_section(fileset: str) -> float:
     return float(xsecs[0])
 
 
-# Get xsec from dataset
-@persist_to_file("rucio")
-def get_all_matching(query: str) -> list[dict]:
+# Expand dataset template to list of datasets
+def get_all_matching(das_template: str) -> list[dict]:
     """
     Find all DAS keys matching a given pattern
 
-    This requires rucio and persists to disk
+    This requires dasgoclient
 
     Args:
-        query (str): The query to pass to Rucio
+        das_template (str): The dataset template to pass to dasgoclient
 
     Returns:
-        list[dict]: A list of Rucio DIDs
+        list[dict]: A list of DAS keys
     """
-    logger.debug(f"Querying rucio with query {query}")
+    logger.debug(f"Querying das with query {das_template}")
 
-    global client
-    if client is None:
-        from coffea.dataset_tools import rucio_utils
-
-        client = rucio_utils.get_rucio_client()
-
-    response = list(
-        client.list_dids(scope="cms", filters={"name": query, "type": "container"})
-    )
-    return response
+    response = run_dasgoclient(f"dataset={das_template}")
+    return [
+        it["dataset"][0]["name"]
+        for it in response
+        if response["dataset"][0]["status"] == "VALID"
+    ]

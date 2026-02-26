@@ -1,9 +1,0 @@
-? /ChargedHiggsToWZTo3LNu_M300_13TeV-madgraph-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/NANOAODSIM
-: []
-/EGamma/Run2022E-22Sep2023-*/NANOAOD:
-- /EGamma/Run2022E-22Sep2023-v1/NANOAOD
-/EGamma/Run2022E-22Sep2023-v1/NANOAOD:
-- /EGamma/Run2022E-22Sep2023-v1/NANOAOD
-? /WtoLNu-4Jets_MLNu-120_HT-2500_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/NANOAODSIM
-: []
-_changed: true

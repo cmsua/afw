@@ -12,6 +12,8 @@ def test_overall_fills_xsec():
     ]
 
     result = afw.dataset.definitions.build_datasets(template)
+    print(f"Received {result}")
+
     assert (
         result[magic.single_xsecdb_das_key]["metadata"]["xsec"]
         == magic.single_xsecdb_xsec
@@ -27,6 +29,8 @@ def test_overall_respects_xsec_override():
     ]
 
     result = afw.dataset.definitions.build_datasets(template)
+    print(f"Received {result}")
+
     assert result[magic.single_xsecdb_das_key]["metadata"]["xsec"] == 123
 
 
@@ -38,6 +42,8 @@ def test_overall_skips_data_xsec():
         }
     ]
     result = afw.dataset.definitions.build_datasets(template)
+    print(f"Received {result}")
+
     assert "xsec" not in result[magic.data_das_key]["metadata"]
 
 
@@ -49,6 +55,8 @@ def test_overall_can_have_multiple_datasets_with_different_xsecs():
     ]
 
     result = afw.dataset.definitions.build_datasets(template)
+    print(f"Received {result}")
+
     assert (
         result[magic.single_xsecdb_das_key]["metadata"]["xsec"]
         == magic.single_xsecdb_xsec
