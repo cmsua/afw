@@ -13,7 +13,7 @@ def apply_xcache_host(fileset: dict[str, dict[str, dict]], xcache_host: str) -> 
         for file, tree in section["files"].items():
             new_files[xcache_host + file] = tree
         section["files"] = new_files
-        result[das_key] = new_files
+        result[das_key] = section
     
     return result
 
