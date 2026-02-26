@@ -57,6 +57,7 @@ dev = [
   "pre-commit",
   "sphinx",
   "pydata-sphinx-theme",
+  "pytest"
 ]
 client = [
   "pycurl",
