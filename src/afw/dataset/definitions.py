@@ -105,7 +105,7 @@ def remove_obsolete_versions(dataset: dict) -> dict:
     """
     Removes obsolete versions with no files from a given dataset. Assumes dataset keys are in the format XXX-v1/XXX
 
-    Params:
+    Args:
         defs (dict): The dataset to process
 
     Returns:

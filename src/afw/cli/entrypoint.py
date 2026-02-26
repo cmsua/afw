@@ -11,7 +11,7 @@ def with_debug_and_config(parser: argparse.ArgumentParser):
     """
     Add the debug and config parameters to a parser
 
-    Params:
+    Args:
         parser (argparse.ArgumentParser): The parser to modify
     """
     parser.add_argument("config", help="The config file to load", type=str)
@@ -31,7 +31,7 @@ def with_skim_dir(parser: argparse.ArgumentParser, required: bool = False):
     """
     Add the skim directory to an argument parser
 
-    Params:
+    Args:
         parser (argparse.ArgumentParser): The parser to modify
         required (bool, default False): Whether the argument is required
     """
@@ -50,7 +50,7 @@ def with_xcache_redirector(parser: argparse.ArgumentParser, required: bool = Fal
     """
     Add the xcache redirector to an argument parser. Defaults to the CMS Global Redirector if XCache cannot be detected.
 
-    Params:
+    Args:
         parser (argparse.ArgumentParser): The parser to modify
         required (bool, default False): Whether the argument is required
     """
@@ -67,7 +67,7 @@ def with_output_dir(parser: argparse.ArgumentParser):
     """
     Add an output directory to an argument parser. Defaults to the CMS Global Redirector if XCache cannot be detected.
 
-    Params:
+    Args:
         parser (argparse.ArgumentParser): The parser to modify
         required (bool, default True): Whether the argument is required
     """
@@ -85,7 +85,7 @@ def with_dask_client(parser: argparse.ArgumentParser):
     """
     Add a Dask client description to an argument parser.
 
-    Params:
+    Args:
         parser (argparse.ArgumentParser): The parser to modify
     """
 
@@ -102,7 +102,7 @@ def with_extension(parser: argparse.ArgumentParser):
     """
     Add a plot file extension to an argument parser.
 
-    Params:
+    Args:
         parser (argparse.ArgumentParser): The parser to modify
     """
 

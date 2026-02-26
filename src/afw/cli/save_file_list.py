@@ -18,7 +18,7 @@ def call(
     """
     Call this subcommand from the CLI
 
-    Params:
+    Args:
         configs (list[afw.objects.AnalysisConfig]): The configs to save (length 1 required)
         xrd_redirector (str): The input xrootd redirector
         dataset_name (str): The name of the dataset to keep

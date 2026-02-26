@@ -16,7 +16,7 @@ def generate_metadata(dataset: dict) -> dict[str, dict]:
     """
     Creates metadata for a dataset
 
-    Params:
+    Args:
         dataset (dict): The dataset with files/etc
 
     Results:
@@ -41,7 +41,7 @@ def save_results(
     """
     Save plots to a file
 
-    Params:
+    Args:
         output_dir (str): the directory to save plots to (including the config name)
         extension (str): The file extension to use when saving plots
         title (str): The title to use on all things
@@ -85,7 +85,7 @@ def call(
     """
     Call this subcommand from the CLI
 
-    Params:
+    Args:
         configs (list[afw.objects.AnalysisConfig]): The configs to skim
         output_dir (str): The directory to write plots to
         extension (str): The file extension to use for plots
@@ -118,7 +118,7 @@ def call_subtr(
     """
     Call this subcommand from the CLI
 
-    Params:
+    Args:
         configs (list[afw.objects.AnalysisConfig]): The configs to skim
         output_dir (str): The directory to write plots to
         input_dir_one (str): The first of two input directories

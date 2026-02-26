@@ -82,7 +82,7 @@ def call(
     """
     Call this subcommand from the CLI
 
-    Params:
+    Args:
         configs (list[afw.objects.AnalysisConfig]): The configs to skim
         skim_dir (str): The output directory (absolute path) to write to
         **kwargs (dict): Any additional arguments

@@ -187,7 +187,7 @@ def call(
     """
     Call this subcommand from the CLI
 
-    Params:
+    Args:
         client (dask.distributed.Client): The dask client to use
         configs (list[afw.objects.AnalysisConfig]): The configs to skim
         skim_dir (str): The output directory (absolute path) to write to
