@@ -152,7 +152,7 @@ def remove_obsolete_versions(dataset: dict) -> dict:
 
 def populate_files(das_key: str, section: dict = {}, max_files: int = None):
     """
-    Populates the ``files`` key for a given das key, and computes ``nevents`` and ``nevents_total``.
+    Populates the ``files`` key for a given das key, and computes ``nevents`` and ``nevents_total``. This will also add the ``fullName`` (DAS key) to the metadata.
 
     Args:
         das_key (str): The das key to look up
@@ -169,6 +169,9 @@ def populate_files(das_key: str, section: dict = {}, max_files: int = None):
         section["metadata"] = {}
     section["metadata"]["nevents"] = 0
     section["metadata"]["nevents_total"] = 0
+
+    # Add "fullName" to result metadata
+    section["metadata"]["fullName"] = das_key
 
     response = cached.run_dasgoclient(f"file dataset={das_key}")
 
