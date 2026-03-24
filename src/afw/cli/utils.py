@@ -1,6 +1,7 @@
 """
 Utilities for CLI tools
 """
+
 import importlib.util
 import logging
 import os
@@ -13,32 +14,59 @@ from ..objects import AnalysisConfig, AnalysisStep
 
 logger = logging.getLogger("utils")
 
+
 ## Dependencies
-def solve_dependency_chain(requested_step: str, steps: dict[str, AnalysisStep]):
+def solve_dependency_chain(
+    requested_step: str,
+    steps_dict: dict[str, AnalysisStep],
+    cached_steps: list[str] = None,
+):
     """
     Solves a dependency chain for a given step
 
     Args:
         requested_step (str): The name of the step to request
         steps (dict[str, AnalysisStep]): A dictionary of steps to results
+        cached_steps (list[str], default None): If present, the cached steps available
+
+    Returns:
+        list[list[str]]: A list of chains to run, in order
+        cached_steps (list[str]): The list of cached steps required
+        initial_data (str): Either "Raw Files" or the name of a step which is cached
     """
     logger.debug(f"Solving dependency chain for {requested_step}")
+    logger.debug(f"Available (cached) steps are {cached_steps}")
 
     # Build list of all steps
     queue = [requested_step]
-    all_steps = []
+    cached_to_load = []
+    steps_to_run = []
     while len(queue) != 0:
         # Add to order
         current_step_name = queue.pop(0)
-        all_steps += [current_step_name]
+
+        # If this step is cached, continue on
+        if current_step_name in cached_steps:
+            cached_to_load += [current_step_name]
+            continue
+
+        # Otherwise, add to the list of steps required to be ran
+        steps_to_run += [current_step_name]
 
         # Add next + dependencies
-        for dependency in steps[current_step_name].dependencies:
-            if dependency not in all_steps and dependency not in queue:
-                logger.debug(f"Adding dependency {dependency} from {current_step_name}")
+        for dependency in steps_dict[current_step_name].dependencies:
+            if dependency not in steps_to_run and dependency not in queue:
+                logger.debug(
+                    f"Adding dependency {dependency} to queue from {current_step_name} as isn't cached"
+                )
                 queue += [dependency]
 
-    logger.debug(f"Found final list of all steps required to process {requested_step}: {all_steps}")
+    logger.debug(
+        f"Found final list of all steps required to process {requested_step}: {steps_to_run}"
+    )
+    logger.debug(
+        f"The following steps are cached and thus not required: {cached_to_load}"
+    )
 
     # Run in reverse - do as much as possible with currently present dependencies, and repeat till every step is done
     # List of list of steps - each sublist will run in series, with their components in parallel
@@ -49,23 +77,32 @@ def solve_dependency_chain(requested_step: str, steps: dict[str, AnalysisStep]):
     accumulated_steps = []
 
     # First load cached steps
-    for step_name in list(all_steps):
-        step = steps[step_name]
+    for step_name in list(steps_to_run):
+        step = steps_dict[step_name]
         # TODO load cache
 
     # Do as much as possible with currently present dependencies, and repeat till every step is done
-    while len(all_steps) != 0:
-        logger.debug(f"Running solver iteration! Current chain: {current_chain}, total chain: {all_chains}")
+    while len(steps_to_run) != 0:
+        logger.debug(
+            f"Running solver iteration! Current chain: {current_chain}, total chain: {all_chains}"
+        )
         # Check dependencies
         current_step = []
         current_step_modifies = []
 
         # Find what steps we can do at the moment
-        for step_name in list(all_steps):
-            step = steps[step_name]
+        for step_name in list(steps_to_run):
+            step = steps_dict[step_name]
+            deps_missing = [
+                dep
+                for dep in step.dependencies
+                if dep not in processed_steps and dep not in cached_to_load
+            ]
             # Only add ones for which we satisfy all present requirements
-            if any([it not in processed_steps for it in steps[step_name].dependencies]):
-                logger.debug(f"Skipping {step_name} as dependency not in {processed_steps}")
+            if len(deps_missing) != 0:
+                logger.debug(
+                    f"Skipping {step_name} as dependencies {deps_missing} not in processed steps {processed_steps} or cached steps"
+                )
                 continue
 
             if step.modifies_events:
@@ -91,19 +128,25 @@ def solve_dependency_chain(requested_step: str, steps: dict[str, AnalysisStep]):
             raise ValueError("Trying to require two event-modifying objects, failing!")
         else:
             raise ValueError("Infinite dependency chain!")
-        
+
         # Add all steps - check if any requires a dependency that must first be accumulated
         required_split = False
         for step_name in steps_to_add:
-            all_steps.remove(step_name)
+            steps_to_run.remove(step_name)
 
             # For each dependency, make sure it's accumulated if needed
-            step = steps[step_name]
+            step = steps_dict[step_name]
             for dependency_name in step.dependencies:
-                dependency = steps[dependency_name]
-                # If it requires a split and one hasn't been done
+                # Exclude cached dependencies - those have already been accumulated
+                if dependency_name in cached_steps:
+                    continue
+
+                dependency = steps_dict[dependency_name]
+                # Exclude dependencies that don't need to be accumulated
                 if not dependency.split_required:
                     continue
+
+                # If it needs to be accumulated and hasn't, force a split
                 if dependency_name not in accumulated_steps:
                     required_split = True
                     break
@@ -118,11 +161,23 @@ def solve_dependency_chain(requested_step: str, steps: dict[str, AnalysisStep]):
         processed_steps += steps_to_add
         current_chain += steps_to_add
 
-    # Add last chain        
+    # Add last chain
     all_chains += [current_chain]
+    logger.debug(f"Computed final list of chains {all_chains}")
 
-    logger.debug(f"Returning final list of chains {all_chains}")
-    return all_chains
+    # Check for raw_files
+    initial_data = "Raw Files"
+    if "Raw Files" not in processed_steps:
+        # Dependencies of first item in first chain
+        deps = steps_dict[all_chains[0][0]].dependencies
+        deps_modifying = [dep for dep in deps if steps_dict[dep].modifies_events]
+        if len(deps_modifying) != 1:
+            raise ValueError("Initial step in chain does not require event-modifying steps in cache!")
+
+        initial_data = deps_modifying[0]
+        logger.debug(f"Identified initial data {initial_data}")
+    return all_chains, cached_to_load, initial_data
+
 
 ## For Skimming
 def is_rootcompat(a: ak.Array) -> bool:
@@ -163,6 +218,7 @@ def uproot_writeable(events: ak.Array) -> ak.Array:
                 }
             )
     return out_event
+
 
 ## Dask Cluster Util
 # Returns Client, Cluster
@@ -226,7 +282,6 @@ def create_dask_client(cluster_address: str, upload_files: list[str] = []):
     return client
 
 
-
 # Get config from ee, emu, mumu, or common (common is only used for skimming)
 def get_configs(file_path: str) -> list[AnalysisConfig]:
     """
@@ -247,7 +302,7 @@ def get_configs(file_path: str) -> list[AnalysisConfig]:
 
     # Inspect module
     return [cls() for cls in module.__all__]
-    
+
 
 # LOGGING
 class Formatter(logging.Formatter):

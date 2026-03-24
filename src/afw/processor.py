@@ -74,16 +74,16 @@ class ModifyingProcessor:
         Returns:
             tuple[ak.Array, dict, dict]: Returns the events for future chains, the cumulative accumulator, and a per-step accumulator
         """
-        new_accumulators = {}
-        current_accumulator = self.prev_accumulator
+        breakdown = {}
+        out = {}
         for step_name in self.chain:
             events, accumulator = self.steps_dict[step_name].process(
-                events, current_accumulator
+                events, self.prev_accumulator
             )
 
-            new_accumulators[step_name] = accumulator
-            current_accumulator = iadd(accumulator, current_accumulator)
-        return events, {"out": current_accumulator, "breakdown": new_accumulators}
+            breakdown[step_name] = accumulator
+            out = iadd(out, accumulator)
+        return events, {"out": out, "breakdown": breakdown}
 
     def postprocess(self, result: dict) -> dict:
         """

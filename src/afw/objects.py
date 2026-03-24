@@ -17,7 +17,7 @@ class AnalysisStep(abc.ABC):
         self,
         dependencies: list[str] = [],
         modifies_events: bool = False,
-        split_required: bool = False
+        split_required: bool = False,
     ):
         """
         Args:
@@ -102,6 +102,14 @@ class AnalysisConfig(abc.ABC):
         """
         pass
 
+    def clean_events(self, events: ak.Array) -> ak.Array:
+        """
+        Args:
+            events (ak.Array): The events to use
+        Returns:
+            ak.Array: The events, cleaned, for future use
+        """
+
 
 class Plottable(abc.ABC):
     """
@@ -179,14 +187,14 @@ class BlankAnalysisStep(AnalysisStep):
         self,
         dependencies: list[str] = [],
         modifies_events: bool = False,
-        split_required: bool = False
+        split_required: bool = False,
     ):
         super().__init__(
             dependencies=dependencies,
             modifies_events=modifies_events,
-            split_required=split_required
+            split_required=split_required,
         )
-        
+
     def process(
         self, events: ak.Array, prev_accumulator: dict
     ) -> tuple[ak.Array, dict]:
