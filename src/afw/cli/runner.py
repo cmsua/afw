@@ -39,6 +39,7 @@ def run_chain(
     dataset: dict,
     prev_accumulator: dict,
     save_files: bool,
+    skim_dir: str,
     output_dir: str,
     runner: DaskExecutor,
 ):
@@ -51,7 +52,8 @@ def run_chain(
         dataset (dict): The dataset to run over
         prev_accumulator (dict): The combined accumulator from any previous steps
         save_files (bool): Whether to save files to disk for reuse
-        output_dir (str): The output directory for the configuration
+        skim_dir (str): The directory from which to save/load skims
+        output_dir (str): The output directory for accumulators
         runner (DaskExecutor): The executor to use
     """
     # This is a skimming run!
@@ -83,7 +85,7 @@ def run_chain(
             skimmed_writable = uproot_writeable(skimmed_fileset)
             # Output directory
             destination = os.path.join(
-                output_dir, chain[-1], skimmed.escape_name(fileset_name)
+                skim_dir, chain[-1], skimmed.escape_name(fileset_name)
             )
 
             # Return so that compute can be called
@@ -101,12 +103,14 @@ def run_chain(
         _, result = dask.compute(skim_write_objs, acc_dict)
 
         # Postprocess
-        result = processor.postprocess(accumulate(result, prev_accumulator))
+        result = accumulate(result)
+        result = processor.postprocess(result)
         logger.debug(f"Got result from compute: {result}")
 
         # Save
         cache_accumulators(result["breakdown"], output_dir)
-        return result["out"], os.path.join(output_dir, chain[-1])
+        new_accum = accumulate([result["out"]], prev_accumulator)
+        return new_accum, os.path.join(skim_dir, chain[-1])
 
     # This is not a skimming run!
     else:
@@ -139,11 +143,11 @@ def run_chain(
 def call(
     client: Client,
     config: AnalysisConfig,
-    skim_dir: str,
     xrd_redirector: str,
     debug: bool,
     n_files: int,
     chunksize: int,
+    skim_dir: str,
     output_dir: str,
     # target_step: str,
     **kwargs: dict,
@@ -158,6 +162,7 @@ def call(
         debug (bool): Whether to use debug mode (crash on bad file rather than skip)
         n_files (int): If not None, the amount of files to limit to
         chunksize (int): The max chunk size allowed per worker
+        skim_dir (str): The location to save/load skims
         output_dir (str): The directory to write plots to
         # target_step (str): The step to run
         **kwargs (dict): Any additional arguments
@@ -211,6 +216,7 @@ def call(
             dataset=dataset,
             prev_accumulator=prev_accumulator,
             save_files=not is_final_chain,
+            skim_dir=skim_dir,
             output_dir=output_dir,
             runner=runner,
         )

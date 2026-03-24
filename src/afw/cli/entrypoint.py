@@ -76,8 +76,8 @@ def with_output_dir(parser: argparse.ArgumentParser):
         "-o",
         "--output_dir",
         type=os.path.expanduser,
-        default="plots",
-        help="Directory in which to save plots",
+        default="output",
+        help="Directory in which to save output accumulators/plots",
     )
 
 

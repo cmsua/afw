@@ -104,6 +104,7 @@ class ModifyingProcessor:
                 result["breakdown"][step_name] = step.postprocess(
                     result["breakdown"][step_name]
                 )
+        return result
 
 
 class NonModifyingProcessor(ModifyingProcessor, ProcessorABC):
