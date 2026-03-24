@@ -164,16 +164,17 @@ def run():
     # Logging
     utils.setup_logging(args.debug)
 
+    # Dask Client
+    # Do this before overriding the config
+    if "cluster_address" in args:
+        args.client = utils.create_dask_client(args.cluster_address, [args.config])
+
     # Select config
     configs = utils.get_configs(args.config)
     if len(configs) != 1:
         logging.critical("File should only specify one config!")
         return
     args.config = configs[0]
-
-    # Dask Client
-    if "cluster_address" in args:
-        args.client = utils.create_dask_client(args.cluster_address, [args.config])
 
     try:
         func = args.func
