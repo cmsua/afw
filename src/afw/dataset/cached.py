@@ -57,21 +57,22 @@ def persist_to_file(file_name: str):
     if os.path.exists(pickle_file):
         with open(pickle_file, "rb") as file:
             cache = pickle.load(file)
+            
+        # Don't save _changed tag when a pickle exists
+        if "_changed" in cache:
+            del cache["_changed"]
     elif os.path.exists(yaml_file):
         with open(yaml_file, "r") as file:
             # Not safe-load
             # If someone's modified your yaml files, this may execute arbitrary code
             cache = yaml.full_load(file)
+            cache["_changed"] = True
             logger.warning("Loaded cache from yaml file and not pickle!")
 
     # Fault on no value
     if not isinstance(cache, dict):
         logger.critical(f"Cache loaded as non-dict, resetting: {cache}")
         cache = {}
-
-    # Don't save _changed tag
-    if "_changed" in cache:
-        del cache["_changed"]
 
     def save_cache():
         # If cache is unchanged, ignore

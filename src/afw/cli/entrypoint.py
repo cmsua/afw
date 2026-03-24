@@ -4,7 +4,7 @@ import os
 import logging
 
 
-from . import merge_skims, plotter, runner, save_file_list, skim, utils
+from . import plotter, runner, utils
 
 
 def with_debug_and_config(parser: argparse.ArgumentParser):
@@ -154,79 +154,6 @@ def run():
     with_debug_and_config(plot_parser)
     plot_parser.set_defaults(func=plotter.call)
 
-    # Plot Difference
-    plot_diff_parser = subparsers.add_parser(
-        "plot_difference", help="Subtract two results and save the outcome plot"
-    )
-    with_output_dir(plot_diff_parser)
-    with_extension(plot_diff_parser)
-    with_debug_and_config(plot_diff_parser)
-    plot_diff_parser.add_argument("-i", "--input_dir_one", type=str, help="Input Directory 1")
-    plot_diff_parser.add_argument("-I", "--input_dir_two", type=str, help="Input Directory 2")
-    plot_diff_parser.set_defaults(func=plotter.call_subtr)
-
-    # File List
-    save_file_list_parser = subparsers.add_parser(
-        "save_file_list",
-        help="Save the file list for use in populating xcache or inspecting dataset metadata",
-    )
-    save_file_list_parser.add_argument(
-        "-o",
-        "--output_file",
-        default="files.txt",
-        help="Save all files to copy to this file",
-    )
-    save_file_list_parser.add_argument(
-        "-s",
-        "--output_file_sorted",
-        default="files_sorted.txt",
-        help="Save all files (sorted) to copy to this file",
-    )
-    save_file_list_parser.add_argument(
-        "-O",
-        "--output_file_full",
-        default="dataset.yaml",
-        help="Save a copy of the dataset to this file",
-    )
-    save_file_list_parser.add_argument(
-        "-D", "--dataset-name", help="Save only a given dataset", type=list
-    )
-    with_xcache_redirector(save_file_list_parser)
-    with_debug_and_config(save_file_list_parser)
-    save_file_list_parser.set_defaults(func=save_file_list.call)
-
-    # SKIMS
-    # Skim
-    skim_parser = subparsers.add_parser(
-        "skim", help="Run the analysis save skims with pre-selected events"
-    )
-    skim_parser.add_argument(
-        "-p",
-        "--parallel",
-        action="store_true",
-        help="Compute each dataset in parallel rather than in series",
-    )
-    skim_parser.add_argument(
-        "-n",
-        "--n-to-one",
-        default=15,
-        type=int,
-        help="The number of input files to one output file",
-    )
-    with_debug_and_config(skim_parser)
-    with_dask_client(skim_parser)
-    with_skim_dir(skim_parser)
-    with_xcache_redirector(skim_parser)
-    skim_parser.set_defaults(func=skim.call)
-
-    # Merge Skims
-    merge_skim_parser = subparsers.add_parser(
-        "merge_skims", help="Merge skims into single files"
-    )
-    with_debug_and_config(merge_skim_parser)
-    with_skim_dir(merge_skim_parser)
-    merge_skim_parser.set_defaults(func=merge_skims.call)
-
     # Run
     args = parser.parse_args()
 
@@ -237,14 +164,19 @@ def run():
     # Logging
     utils.setup_logging(args.debug)
 
+    # Select config
+    configs = utils.get_configs(args.config)
+    if len(configs) != 1:
+        logging.critical("File should only specify one config!")
+        return
+    args.config = configs[0]
+
     # Dask Client
     if "cluster_address" in args:
         args.client = utils.create_dask_client(args.cluster_address, [args.config])
 
     try:
         func = args.func
-        args.configs = utils.get_configs(args.config)
-
         func(**vars(args))
     finally:
         if "client" in args:

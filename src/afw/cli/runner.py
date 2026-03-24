@@ -5,99 +5,147 @@ import os
 import pickle
 import time
 
+import dask
+import uproot
+from coffea.dataset_tools import apply_to_fileset, preprocess
 from coffea.nanoevents import NanoAODSchema
-from coffea.processor import DaskExecutor, Runner
+from coffea.processor import DaskExecutor, Runner, accumulate
 from dask.distributed import Client
 
-from .. import dataset
-from ..objects import AnalysisConfig
-from ..processor import MyProcessor
-from . import plotter
+from ..dataset import apply_xcache_host, print_summary, skimmed
+from ..objects import AnalysisConfig, AnalysisStep
+from ..processor import ModifyingProcessor, NonModifyingProcessor
+from .utils import solve_dependency_chain, uproot_writeable
 
 logger = logging.getLogger("Runtime")
 
 
-def handle_channel(
-    config: AnalysisConfig,
-    xrd_redirector: str,
-    output_dir: str,
-    skim_dir_root: str,
-    n_files: int,
-    runner: Runner,
-) -> None:
-    """Create and save plots for a given :class:`objects.AnalysisConfig`
-
-    Parameters:
-        config (objects.AnalysisConfig): The config to process
-        xrd_redirector (str): The host of the XRootD Redirector to use
-        output_dir (str): The output directory for plots
-        skim_dir_root (str): The input directory for skims
-        n_files (int): If not None, the amount of files to limit to
-        runner (coffea.processor.Runner): The Coffea runner to use
+def cache_accumulators(new_accumulators: dict[str, dict], output_dir: str):
     """
-    logger.info(f"Handling channel {config.name}")
+    Save the accumulators in a given chain
 
-    # Load dataset, with preskims if needed
-    my_dataset = config.get_dataset(n_files)
-    if n_files is not None:
-        logger.critical(f"Limited to {n_files} files per fileset!")
-    my_dataset = dataset.apply_xcache_host(my_dataset, xrd_redirector)
+    Args:
+        new_accumulators (dict[str, dict]): A mapping from accumulator names to accumulator to save
+    """
+    for step_name, accumulator in new_accumulators.items():
+        output_file = os.path.join(output_dir, step_name + ".pkl")
+        with open(output_file, "wb") as file:
+            pickle.dump(accumulator, file)
 
-    # Check for skims
-    skim_dir = os.path.abspath(os.path.join(skim_dir_root, config.name))
-    if os.path.isdir(skim_dir):
-        my_dataset = dataset.skimmed.convert_to_skimmed(my_dataset, skim_dir)
-    else:
-        logger.warning(
-            f"Skim directory {skim_dir} does not exist, running from raw files..."
+
+def run_chain(
+    chain: list[str],
+    steps_dict: dict[str, AnalysisStep],
+    dataset: dict,
+    prev_accumulator: dict,
+    save_files: bool,
+    output_dir: str,
+    runner: DaskExecutor,
+):
+    """
+    Run a given chain of steps, returning the resulting accumulator and (optionally) the location of saved files
+
+    Args:
+        chain (list[str]): The list of steps to run
+        steps_dict (dict[str, AnalysisStep]): The mapping from step names to step
+        dataset (dict): The dataset to run over
+        prev_accumulator (dict): The combined accumulator from any previous steps
+        save_files (bool): Whether to save files to disk for reuse
+        output_dir (str): The output directory for the configuration
+        runner (DaskExecutor): The executor to use
+    """
+    # This is a skimming run!
+    if save_files:
+        logger.debug("Running and saving files")
+        logger.info("Preprocessing")
+        dataset, _ = preprocess(
+            dataset,
+            align_clusters=False,
+            step_size=100_000,
+            files_per_batch=1,
+            skip_bad_files=False,
+            save_form=False,
         )
-        skim_dir = None
 
-    # Print
-    dataset.print_summary(my_dataset, logger, use_short_name=False)
-    processor = MyProcessor(skimmed=skim_dir is not None, config=config)
+        logger.info("Computing Task Graph")
+        processor = ModifyingProcessor(
+            chain=chain, steps_dict=steps_dict, prev_accumulator=prev_accumulator
+        )
 
-    # Preprocess
-    logger.info("Preprocessing fileset")
-    preprocessed_fileset = runner.preprocess(my_dataset)
+        skimmed_dict = apply_to_fileset(
+            processor.process, dataset, schemaclass=NanoAODSchema
+        )
 
-    # Run
-    logger.info("Running Analysis")
+        skim_write_objs = []
+        acc_dict = []
+        for fileset_name, (skimmed_fileset, acc) in skimmed_dict.items():
+            logger.debug(f"Computing task graph for {fileset_name}")
+            skimmed_writable = uproot_writeable(skimmed_fileset)
+            # Output directory
+            destination = os.path.join(
+                output_dir, chain[-1], skimmed.escape_name(fileset_name)
+            )
 
-    # Rub with time elapsed
-    tstart = time.time()
-    results, report = runner(preprocessed_fileset, processor_instance=processor)
-    elapsed = time.time() - tstart
+            # Return so that compute can be called
+            process = uproot.dask_write(
+                skimmed_writable,
+                compute=False,
+                tree_name="Events",
+                destination=destination,
+            )
+            skim_write_objs += [process]
+            acc_dict += [acc]
 
-    # Print metrics
-    logger.info(f"Processed {report['bytesread'] / 1e9:.3f} GB")
-    logger.info(f"Processed {report['bytesread'] / 1e9 / elapsed:.3f} GB/sec")
-    logger.info(f"Processed {report['entries']:>15,.0f} events")
-    logger.info(f"Processed {report['entries'] / (elapsed):>15,.0f} events/s")
+        # Compute
+        logger.info("Processing")
+        _, result = dask.compute(skim_write_objs, acc_dict)
 
-    # Save results
-    output_dir = os.path.join(output_dir, config.name)
-    os.makedirs(output_dir, exist_ok=True)
+        # Postprocess
+        result = processor.postprocess(accumulate(result, prev_accumulator))
+        logger.debug(f"Got result from compute: {result}")
 
-    logger.info("Saving hists")
-    with open(os.path.join(output_dir, "results.pkl"), "wb") as file:
-        pickle.dump(results, file)
+        # Save
+        cache_accumulators(result["breakdown"], output_dir)
+        return result["out"], os.path.join(output_dir, chain[-1])
 
-    metadata = plotter.generate_metadata(my_dataset)
-    plotter.save_results(
-        output_dir, "png", config.name, config.get_things_to_plot(), metadata, results
-    )
+    # This is not a skimming run!
+    else:
+        logger.debug("Running without modification of fileset")
+        logger.info("Preprocessing")
+        preprocessed_dataset = runner.preprocess(dataset)
+
+        logger.info("Processing")
+        processor = NonModifyingProcessor(
+            chain=chain, steps_dict=steps_dict, prev_accumulator=prev_accumulator
+        )
+
+        tstart = time.time()
+        result, report = runner(preprocessed_dataset, processor_instance=processor)
+        elapsed = time.time() - tstart
+
+        logger.debug(f"Got result from compute: {result}")
+
+        # Save
+        cache_accumulators(result["breakdown"], output_dir)
+
+        # Print metrics
+        logger.info(f"Processed {report['bytesread'] / 1e9:.3f} GB")
+        logger.info(f"Processed {report['bytesread'] / 1e9 / elapsed:.3f} GB/sec")
+        logger.info(f"Processed {report['entries']:>15,.0f} events")
+        logger.info(f"Processed {report['entries'] / (elapsed):>15,.0f} events/s")
+        return accumulate([result["out"]], prev_accumulator), None
 
 
 def call(
     client: Client,
-    configs: list[AnalysisConfig],
+    config: AnalysisConfig,
     skim_dir: str,
     xrd_redirector: str,
     debug: bool,
     n_files: int,
     chunksize: int,
     output_dir: str,
+    # target_step: str,
     **kwargs: dict,
 ):
     """
@@ -105,26 +153,65 @@ def call(
 
     Args:
         client (dask.distributed.Client): The dask client to use
-        configs (list[afw.objects.AnalysisConfig]): The configs to skim
-        skim_dir (str): The output directory (absolute path) to write to
+        config (afw.objects.AnalysisConfig): The config to run over
         xrd_redirector (str): The input xrootd redirector
         debug (bool): Whether to use debug mode (crash on bad file rather than skip)
         n_files (int): If not None, the amount of files to limit to
         chunksize (int): The max chunk size allowed per worker
         output_dir (str): The directory to write plots to
+        # target_step (str): The step to run
         **kwargs (dict): Any additional arguments
     """
+    # Make output
+    output_dir = os.path.abspath(os.path.join(output_dir, config.name))
+    os.makedirs(output_dir, exist_ok=True)
 
     # Create runner
     runner = Runner(
         DaskExecutor(client=client, compression=None),
         chunksize=chunksize,
         # maxchunks=10,
-        skipbadfiles=not debug,
+        skipbadfiles=False,
         schema=NanoAODSchema,
         savemetrics=True,
     )
 
-    # Run on channel
-    for config in configs:
-        handle_channel(config, xrd_redirector, output_dir, skim_dir, n_files, runner)
+    # Load raw dataset
+    logger.info("Getting dataset")
+    raw_files = config.get_dataset(n_files)
+    if n_files is not None:
+        logger.critical(f"Limited to {n_files} files per fileset!")
+    raw_files = apply_xcache_host(raw_files, xrd_redirector)
+    print_summary(raw_files, logger, use_short_name=False)
+
+    # Get target
+    logger.info("Building chains")
+    steps_dict = config.get_steps()
+    all_chains = solve_dependency_chain(config.get_default_step(), steps_dict)
+    logger.debug(f"Using list of chains {all_chains}")
+
+    prev_accumulator = {}
+    prev_files_output_dir = None
+
+    for i, chain in enumerate(all_chains):
+        is_final_chain = i + 1 == len(all_chains)
+        logger.debug(f"Running chain {chain}, is final chain: {is_final_chain}")
+
+        # Initial run, get the dataset from the config
+        if chain[0] == "Raw Files":
+            dataset = raw_files
+        # Otherwise, use prev files output
+        else:
+            dataset = skimmed.convert_to_skimmed(raw_files, prev_files_output_dir)
+
+        # Run
+        prev_accumulator, prev_files_output_dir = run_chain(
+            chain=chain,
+            steps_dict=steps_dict,
+            dataset=dataset,
+            prev_accumulator=prev_accumulator,
+            save_files=not is_final_chain,
+            output_dir=output_dir,
+            runner=runner,
+        )
+        logger.debug(f"Received new accumulator {prev_accumulator}")
