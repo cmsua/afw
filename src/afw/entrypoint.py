@@ -55,7 +55,7 @@ def run():
         "--xrd_redirector",
         help="XRootD Redirector for all data/mc files",
         default="root://"
-        + os.environ.get("XRD_REDIRECTOR", "cms-xrd-global.cern.ch")
+        + os.environ.get("XCACHE_HOST", "cms-xrd-global.cern.ch")
         + "/",
     )
 
