@@ -201,7 +201,7 @@ class ProcessEventsSkimming(ProcessEvents):
         for fileset_name, fileset in dataset.items():
             skimmed_fileset, acc = apply_to_fileset(
                 process_function, {fileset_name: fileset}, schemaclass=NanoAODSchema
-            )
+            )[fileset_name]
             logger.info(f"Processing {fileset_name}")
             skimmed_writable = uproot_writeable(skimmed_fileset)
             # Output directory
