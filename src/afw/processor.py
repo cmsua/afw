@@ -3,12 +3,13 @@ import logging
 import os
 import pickle
 import time
+from typing import Callable
 
 import awkward as ak
 import dask
 import dask_awkward as dak
 import uproot
-from coffea.dataset_tools import apply_to_fileset, preprocess
+from coffea.dataset_tools import apply_to_dataset, apply_to_fileset, preprocess
 from coffea.nanoevents import NanoAODSchema
 from coffea.processor import (
     DaskExecutor,
@@ -160,6 +161,63 @@ class ProcessEventsSkimming(ProcessEvents):
         self.batch = batch
         super().__init__(**kwargs)
 
+    def run_batch(
+        self, dataset: dict, process_function: Callable, output_dir: str
+    ) -> dict:
+        skimmed_dict = apply_to_fileset(
+            process_function, dataset, schemaclass=NanoAODSchema
+        )
+
+        # After skimming, handle saving
+        skim_write_objs = []
+        acc_list = []
+        for fileset_name, (skimmed_fileset, acc) in skimmed_dict.items():
+            logger.debug(f"Computing task graph for {fileset_name}")
+            skimmed_writable = uproot_writeable(skimmed_fileset)
+            # Output directory
+            destination = os.path.join(output_dir, slugify(fileset_name))
+
+            # Return so that compute can be called
+            process = uproot.dask_write(
+                skimmed_writable,
+                compute=False,
+                tree_name="Events",
+                destination=destination,
+            )
+            skim_write_objs += [process]
+            acc_list += [acc]
+
+        # Compute
+        logger.info("Processing")
+        _, result = dask.compute(skim_write_objs, acc_list)
+        return result
+
+    def run_indep(
+        self, dataset: dict, process_function: Callable, output_dir: str
+    ) -> dict:
+
+        # After skimming, handle saving
+        acc_list = []
+        for fileset_name, fileset in dataset.items():
+            skimmed_fileset, acc = apply_to_dataset(
+                process_function, fileset, schemaclass=NanoAODSchema
+            )
+            logger.info(f"Processing {fileset_name}")
+            skimmed_writable = uproot_writeable(skimmed_fileset)
+            # Output directory
+            destination = os.path.join(output_dir, slugify(fileset_name))
+
+            # Return so that compute can be called
+            process = uproot.dask_write(
+                skimmed_writable,
+                compute=False,
+                tree_name="Events",
+                destination=destination,
+            )
+            _, acc = dask.compute(process, acc)
+            acc_list += [acc]
+        return acc_list
+
     def process(
         self,
         dataset: dict,
@@ -185,38 +243,12 @@ class ProcessEventsSkimming(ProcessEvents):
             processors=self.processors, accumulator=accumulator
         )
 
-        skimmed_dict = apply_to_fileset(
-            processor.process, dataset, schemaclass=NanoAODSchema
-        )
-
-        # After skimming, handle saving
-        skim_write_objs = []
-        acc_list = []
-        for fileset_name, (skimmed_fileset, acc) in skimmed_dict.items():
-            logger.debug(f"Computing task graph for {fileset_name}")
-            skimmed_writable = uproot_writeable(skimmed_fileset)
-            # Output directory
-            destination = os.path.join(skim_dir, self.name, slugify(fileset_name))
-
-            # Return so that compute can be called
-            process = uproot.dask_write(
-                skimmed_writable,
-                compute=False,
-                tree_name="Events",
-                destination=destination,
-            )
-            skim_write_objs += [process]
-            acc_list += [acc]
-
-        # Compute
-        logger.info("Processing")
         if self.batch:
-            _, result = dask.compute(skim_write_objs, acc_list)
+            result = self.run_batch(
+                dataset, processor.process, os.path.join(skim_dir, self.name)
+            )
         else:
-            result = []
-            for skim_write_obj, acc in zip(skim_write_objs, acc_list):
-                _, acc = dask.compute(skim_write_obj, acc)
-                result += [acc]
+            result = self.run_indep(dataset, processor.process, os.path.join(skim_dir, self.name))
 
         # Postprocess
         result = accumulate(result)
