@@ -208,7 +208,7 @@ class Arbitrary(Plottable):
             )
         elif self.hist_type == "discrete":
             axis = hist.axis.Variable(
-                self.bin_values, name="njet", label="Jet multiplicity"
+                self.bin_values, name="values", label=self.labels
             )
         else:
             raise ValueError(
@@ -307,7 +307,7 @@ class NJets(Arbitrary):
             units="Jet",
             fetch_data=lambda events: ak.num(events.Jet),
             hist_type="discrete",
-            bin_values=list(range(4, 16)),
+            bin_values=list(range(0, 16)),
         )
 
 
