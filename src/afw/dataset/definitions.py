@@ -10,13 +10,16 @@ from . import cached
 logger = logging.getLogger("Dataset Definitions")
 
 
-def build_datasets(base: str | dict, max_files: int = None) -> dict[str, dict]:
+def build_datasets(
+    base: str | dict, max_files: int = None, ignored_files: list[str] = None
+) -> dict[str, dict]:
     """
     Builds a complete dataset from a given file.
 
     Args:
         base (str | dict): If a string, the path to any yaml file template for a dataset. Otherwise, a dict value.
         max_files (int, default None): If present, the amount of files to restrict to per section
+        ignored_files (list[str], default None): If present, a list of files to ignore when populating entries
 
     Returns:
         dict[str, dict]: A mapping from das keys to a dictionary containing ``files`` and ``metadata`` keys.
@@ -38,17 +41,17 @@ def build_datasets(base: str | dict, max_files: int = None) -> dict[str, dict]:
     # Populate each section
     new_result = {}
     for das_key, section in result.items():
-        section = populate_files(das_key, section, max_files)
+        section = populate_files(das_key, section, max_files, ignored_files)
 
         # Check for fails
         if len(section["files"]) == 0:
-            logger.critical(
-                f"Fileset has zero files: {das_key}"
-            )
+            logger.critical(f"Fileset has zero files: {das_key}")
             continue
 
         # Populate xsec if needed
-        if section["metadata"].get("xsec", None) is None and not section["metadata"].get("isData", False):
+        if section["metadata"].get("xsec", None) is None and not section[
+            "metadata"
+        ].get("isData", False):
             xsec = cached.get_cross_section(das_key)
             if xsec == 0:
                 logger.critical(f"Cross-section is zero for key {das_key}, skipping!")
@@ -150,7 +153,12 @@ def remove_obsolete_versions(dataset: dict) -> dict:
     return dataset
 
 
-def populate_files(das_key: str, section: dict = {}, max_files: int = None):
+def populate_files(
+    das_key: str,
+    section: dict = {},
+    max_files: int = None,
+    ignored_files: list[str] = None,
+):
     """
     Populates the ``files`` key for a given das key, and computes ``nevents`` and ``nevents_total``. This will also add the ``fullName`` (DAS key) to the metadata.
 
@@ -158,6 +166,7 @@ def populate_files(das_key: str, section: dict = {}, max_files: int = None):
         das_key (str): The das key to look up
         section (dict, default {}): The existing section to use, for passing along pre-existing metadata
         max_files (int, default None): If present, the amount of files to restrict to
+        ignored_files (list[str], default None): If present, a list of files to ignore when populating entries
 
     Returns:
         dict[str, dict]: A dictionary with ``files`` and ``metadata`` keys.
@@ -182,9 +191,9 @@ def populate_files(das_key: str, section: dict = {}, max_files: int = None):
         file = entry["file"][0]
 
         name = file["name"]
-        # if is_vetoed(name):
-        #     logger.critical(f"Skipping file due to entry in veto list: {file}")
-        #     continue
+        if ignored_files is not None and name in ignored_files:
+            logger.critical(f"Skipping file due to entry in veto list: {file}")
+            continue
 
         if "nevents" not in file or file["nevents"] == 0:
             logger.warning(
@@ -202,5 +211,6 @@ def populate_files(das_key: str, section: dict = {}, max_files: int = None):
         section["files"][name] = "Events"
         section["metadata"]["nevents"] += file["nevents"]
     return section
+
 
 __all__ = [build_datasets]

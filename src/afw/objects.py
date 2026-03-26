@@ -51,19 +51,20 @@ class AnalysisConfig(abc.ABC):
         """
         pass
 
-    def build_datasets(self, defs_file: str):
+    def build_datasets(self, defs_file: str, ignored_files: list[str]):
         """
         Utility method. Given a definitions file, returns a runnable that, when called, will use xrd_redirector and n_files to properly build the dataset.
 
         Args:
             defs_file (str): The definitions yaml file
+            ignored_files (list[str], default None): If present, a list of files to ignore when populating entries
 
         Returns:
             callable: A callable that requires ``xrd_redirector`` and ``n_files`` at runtime
         """
 
         def build_datasets_at_runtime(xrd_redirector: str, n_files: int, **kwargs: dict):
-            return apply_xrd_redirector(build_datasets(defs_file, n_files), xrd_redirector)
+            return apply_xrd_redirector(build_datasets(defs_file, n_files, ignored_files), xrd_redirector)
 
         return build_datasets_at_runtime
 
