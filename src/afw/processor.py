@@ -9,7 +9,7 @@ import awkward as ak
 import dask
 import dask_awkward as dak
 import uproot
-from coffea.dataset_tools import apply_to_dataset, apply_to_fileset, preprocess
+from coffea.dataset_tools import apply_to_fileset, preprocess
 from coffea.nanoevents import NanoAODSchema
 from coffea.processor import (
     DaskExecutor,
@@ -199,8 +199,8 @@ class ProcessEventsSkimming(ProcessEvents):
         # After skimming, handle saving
         acc_list = []
         for fileset_name, fileset in dataset.items():
-            skimmed_fileset, acc = apply_to_dataset(
-                process_function, fileset, schemaclass=NanoAODSchema
+            skimmed_fileset, acc = apply_to_fileset(
+                process_function, {fileset_name: fileset}, schemaclass=NanoAODSchema
             )
             logger.info(f"Processing {fileset_name}")
             skimmed_writable = uproot_writeable(skimmed_fileset)
@@ -248,7 +248,9 @@ class ProcessEventsSkimming(ProcessEvents):
                 dataset, processor.process, os.path.join(skim_dir, self.name)
             )
         else:
-            result = self.run_indep(dataset, processor.process, os.path.join(skim_dir, self.name))
+            result = self.run_indep(
+                dataset, processor.process, os.path.join(skim_dir, self.name)
+            )
 
         # Postprocess
         result = accumulate(result)
