@@ -154,9 +154,9 @@ class Arbitrary(Plottable):
         label: str,
         units: str,
         fetch_data: Callable,
-        where: Callable | None,
+        where: Callable | None = None,
         # Type: "continuous", "discrete"
-        hist_type: str,
+        hist_type: str = "continuous",
         # For hist_type == "continuous"
         n_bins: int = None,
         low_bin: float = None,

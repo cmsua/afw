@@ -22,6 +22,7 @@ def run():
 
     # RUNTIME
     parser.add_argument("config", help="The config file to load", type=str)
+    parser.add_argument("cls", help="The class in the config to load", type=str)
     parser.add_argument(
         "option", help="The option to run in the given config", type=str
     )
@@ -100,10 +101,16 @@ def run():
 
     # Select config
     configs = get_configs(args.config)
-    if len(configs) != 1:
-        logging.critical("File should only specify one config!")
+    config_map = {}
+    for config in configs:
+        config_map[config.name] = config
+
+    if args.cls not in config_map:
+        logger.critical(f"Class {args.cls} not found in config! Valid classes:")
+        for cls_name in config_map:
+            logger.critical(f"- {cls_name}")
         return
-    config = configs[0]
+    config = config_map[args.cls]
 
     # Fix paths for this specific config
     args.skim_dir = os.path.join(os.path.abspath(args.skim_dir), config.name)
@@ -114,7 +121,7 @@ def run():
 
     # Check option is valid
     if args.option not in options:
-        logger.critical("Option {args.option} not found in config! Valid options:")
+        logger.critical(f"Option {args.option} not found in config! Valid options:")
         for option in options:
             logger.critical(f"- {option}")
         return
