@@ -38,12 +38,23 @@ class FillHistograms(MicroProcessorABC):
     ) -> tuple[ak.Array, dict]:
         result = {}
         for plottable in self.plottables:
-            result[plottable.label] = plottable.fill_histogram(
-                plottable.create_histogram(),
-                events,
-                events.metadata["shortName"],
-                self.compute_weights(events, prev_accumulator),
-            )
+            # Use mask if present
+            if plottable.where is not None:
+                mask = plottable.where(events)
+                result[plottable.label] = plottable.fill_histogram(
+                    plottable.create_histogram(),
+                    events[mask],
+                    events.metadata["shortName"],
+                    self.compute_weights(events[mask], prev_accumulator),
+                )
+            else:
+                result[plottable.label] = plottable.fill_histogram(
+                    plottable.create_histogram(),
+                    events,
+                    events.metadata["shortName"],
+                    self.compute_weights(events, prev_accumulator),
+                )
+
         return events, {"plots": result}
 
 
@@ -143,6 +154,7 @@ class Arbitrary(Plottable):
         label: str,
         units: str,
         fetch_data: Callable,
+        where: Callable | None,
         # Type: "continuous", "discrete"
         hist_type: str,
         # For hist_type == "continuous"
@@ -156,7 +168,8 @@ class Arbitrary(Plottable):
         Args:
             label (str): The label on the x-axis of the chart
             units (str): The units of bin width
-            fetch_data (Callable): Given ``events``, returns the values to be plotted
+            fetch_data (Callable): Given ``events``, returns the values to be plotted. This should not include the ``where`` filter if present.
+            where (Callable): Given ``events``, returns a mask of events to process.
             hist_type (str): One of ``"continuous"`` or ``"discrete"``
             n_bins (int, default None): If ``hist_type == "continuous"``, the number of bins present
             low_bin (int, default None): If ``hist_type == "continuous"``, the lower bound for bins
@@ -168,6 +181,7 @@ class Arbitrary(Plottable):
 
         self.units = units
         self.fetch_data = fetch_data
+        self.where = where
 
         self.hist_type = hist_type
         assert hist_type == "continuous" or hist_type == "discrete"
