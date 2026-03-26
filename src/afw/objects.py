@@ -3,44 +3,116 @@ This file contains the bare-bones essentials of any analysis.
 """
 
 import abc
+import os
+import pickle
 
 import awkward as ak
 import hist
 
+from .dataset import apply_xrd_redirector, build_datasets, to_skimmed
 
-class AnalysisStep(abc.ABC):
+
+class Stage(abc.ABC):
     """
-    A step in any given analysis
+    Represents one stage of an analysis (eg. the first or second run)
     """
 
-    def __init__(
-        self,
-        dependencies: list[str] = [],
-        modifies_events: bool = False,
-        split_required: bool = False,
-    ):
+    def __init__(self, name: str):
         """
         Args:
-            dependencies (str | list[str]): Any dependencies given for this particular step of the analysis, referred to by their name in the analysis config. This may be given as a list, or in the case of a singular dependency, a string. If specifying multiple dependencies, only one may modify the ``events`` object.
-            modifies_events (bool, default False): Whether the given step modifies the ``events`` object.
-            split_required (bool, default False): Whether the given step requires post-processing in order for it to be utilized as a dependency
+            name (str): The name of this stage.
         """
-        self.dependencies = (
-            dependencies if isinstance(dependencies, list) else [dependencies]
-        )
-        self.modifies_events = modifies_events
-        self.split_required = split_required
+        self.name = name
 
     @abc.abstractmethod
-    def process(
-        self, events: ak.Array, prev_accumulator: dict
-    ) -> tuple[ak.Array, dict]:
+    def run(self, **kwargs: dict):
+        """
+        Runs the given stage.
+
+        Args:
+            **kwargs (dict): Any command-line arguments passed to the analysis
+        """
+        pass
+
+
+class AnalysisConfig(abc.ABC):
+    """An analysis config"""
+
+    def __init__(self, name: str):
+        self.name = name
+
+    @abc.abstractmethod
+    def get_options(self) -> dict[str, list[Stage]]:
+        """
+        Returns the set of runnable options in this analysis.
+
+        Returns:
+            dict[str, list[Stage]]: A mapping between runnable options and the stages they contain
+        """
+        pass
+
+    def build_datasets(self, defs_file: str):
+        """
+        Utility method. Given a definitions file, returns a runnable that, when called, will use xrd_redirector and n_files to properly build the dataset.
+
+        Args:
+            defs_file (str): The definitions yaml file
+
+        Returns:
+            callable: A callable that requires ``xrd_redirector`` and ``n_files`` at runtime
+        """
+
+        def build_datasets_at_runtime(xrd_redirector: str, n_files: int, **kwargs: dict):
+            return apply_xrd_redirector(build_datasets(defs_file, n_files), xrd_redirector)
+
+        return build_datasets_at_runtime
+
+    def load_from_skims(self, task_name: str, defs_file: str, **kwargs: dict):
+        """
+        Utility method. Given a definitions file, returns a runnable that, when called, will generate a dataset definitions from a previous run's skims using ``skim_dir`` and ``task_name``
+
+        Args:
+            task_name (str): The task to load frim
+            defs_file (str): The definitions yaml file
+
+        Returns:
+            callable: A callable that requires ``skim_dir`` at runtime
+        """
+        return lambda skim_dir, **kwargs2: to_skimmed(
+            build_datasets(defs_file), os.path.join(skim_dir, task_name)
+        )
+
+    def load_from_pickle(self, task_name: str, **kwargs: dict):
+        """
+        Utility method. Given a definitions file, returns a runnable that, when called, will load a pickle from the given task's ``output_dir``
+
+        Args:
+            task_name (str): The task to load from
+
+        Returns:
+            callable: A callable that requires ``output_dir`` at runtime
+        """
+        def load_from_pickle_runtime(output_dir: str, **kwargs2: dict):
+            file_name = os.path.join(output_dir, f"{task_name}.pkl")
+            with open(file_name, "rb") as file:
+                return pickle.load(file)
+
+        return load_from_pickle_runtime
+
+
+class MicroProcessorABC(abc.ABC):
+    """
+    A micro-processor, for use later
+    """
+
+    @abc.abstractmethod
+    def process(self, events: ak.Array, accumulator: dict) -> tuple[ak.Array, dict]:
         """
         Processes the given step, akin to a Coffea Processor. Returns a tuple consisting of ``events, accumulator`` from dependencies.
 
         Args:
             events (ak.array): The initial events object. This should only be modified if ``modifies_events`` is ``True``, or the dependency solver may error.
-            prev_accumulator (dict): A coffea accumulator, summed and returned from previous dependencies
+            accumulator (dict): A coffea accumulator, summed and returned from previous dependencies
 
         Returns:
             ak.Array, dict: A tuple consisting of ``events`` and a new accumulator, which will be post-processed after ran on all files and then merged with ``prev_accumulator``.
@@ -60,57 +132,6 @@ class AnalysisStep(abc.ABC):
         pass
 
 
-class AnalysisConfig(abc.ABC):
-    """
-    An object representing a full analysis
-    """
-
-    def __init__(self, name: str):
-        """
-        Args:
-            name (str): The name of the analysis. This should be a valid folder name
-        """
-        self.name = name
-
-    @abc.abstractmethod
-    def get_dataset(self, max_files: int = None) -> dict:
-        """
-        Gets the fully-formatted dataset for the current analysis
-
-        Args:
-            max_files (int, default None): The maximum amount of files per fileset to allow
-        Returns:
-            dict: A fully rendered dataset with a list of files and metadata
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_steps(self) -> dict[str, AnalysisStep]:
-        """
-        Gets a mapping of steps associated with this analysis
-
-        Returns:
-            dict[str, AnalysisStep]: A mapping from the name of the analysis step to its implementation
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_default_step(self) -> str:
-        """
-        Returns:
-            str: The name of the default step of the analysis to run
-        """
-        pass
-
-    def clean_events(self, events: ak.Array) -> ak.Array:
-        """
-        Args:
-            events (ak.Array): The events to use
-        Returns:
-            ak.Array: The events, cleaned, for future use
-        """
-
-
 class Plottable(abc.ABC):
     """
     A generic class representing any given object to plot
@@ -122,7 +143,6 @@ class Plottable(abc.ABC):
             label (str): The label of the overall plot
         """
         self.label = label
-        self.escaped_name = label.replace("$", "").replace("\\", "").replace("/", "")
 
     @abc.abstractmethod
     def create_histogram(self) -> hist.Hist:
@@ -180,22 +200,4 @@ class Plottable(abc.ABC):
         pass
 
 
-class BlankAnalysisStep(AnalysisStep):
-    """A blank step, used either to force the use of raw files or to combine several existing steps in logic"""
-
-    def __init__(
-        self,
-        dependencies: list[str] = [],
-        modifies_events: bool = False,
-        split_required: bool = False,
-    ):
-        super().__init__(
-            dependencies=dependencies,
-            modifies_events=modifies_events,
-            split_required=split_required,
-        )
-
-    def process(
-        self, events: ak.Array, prev_accumulator: dict
-    ) -> tuple[ak.Array, dict]:
-        return events, {}
+__all__ = [MicroProcessorABC, Plottable, Stage]

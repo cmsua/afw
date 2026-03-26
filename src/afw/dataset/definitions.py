@@ -202,3 +202,5 @@ def populate_files(das_key: str, section: dict = {}, max_files: int = None):
         section["files"][name] = "Events"
         section["metadata"]["nevents"] += file["nevents"]
     return section
+
+__all__ = [build_datasets]

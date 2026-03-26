@@ -6,33 +6,29 @@ import awkward as ak
 import hist
 import mplhep as hep
 import numpy as np
+import os
 
 from typing import Callable
-from .objects import Plottable, AnalysisStep
+from .objects import Plottable, MicroProcessorABC, Stage
+from .utils import slugify
 
 
-class FillHistograms(AnalysisStep):
+class FillHistograms(MicroProcessorABC):
     """
     The final step in the analysis, which computes weights and fills histograms
     """
 
     def __init__(
         self,
-        dependencies: str | list[str],
         plottables: list[Plottable],
         compute_weights: Callable,
     ):
         """
         Args:
-            dependencies (str | list[str]): Any dependencies given for this particular step of the analysis, referred to by their name in the analysis config. This may be given as a list, or in the case of a singular dependency, a string. If specifying multiple dependencies, only one may modify the ``events`` object.
             plottables (list[Plottable]): A list of all plottables
             compute_weights (Callable): Accepts events and prev_accumulator and returns an ``ak.Array`` of weights
         """
-        super().__init__(
-            dependencies=dependencies,
-            modifies_events=True,
-            split_required=False
-        )
+        super().__init__()
 
         self.plottables = plottables
         self.compute_weights = compute_weights
@@ -49,6 +45,47 @@ class FillHistograms(AnalysisStep):
                 self.compute_weights(events, prev_accumulator),
             )
         return events, {"plots": result}
+
+
+class SaveHistograms(Stage):
+    def __init__(self, name: str, plottables: list[Plottable], dataset: dict | Callable, accumulator: dict|Callable):
+        super().__init__(name=name)
+        self.plottables = plottables
+
+        self.dataset = dataset
+        self.accumulator = accumulator
+
+    def run(self, output_dir: str, extension: str, **kwargs: dict):
+        dataset = self.dataset
+        if callable(dataset):
+            dataset = dataset(**{"output_dir": output_dir, **kwargs})
+
+        accumulator = self.accumulator
+        if callable(accumulator):
+            accumulator = accumulator(**{"output_dir": output_dir, **kwargs})
+
+        # Get metadata
+        metadata = {}
+        for key, val in dataset.items():
+            name = val["metadata"]["shortName"]
+            metadata[name] = val["metadata"]
+
+        
+
+        plots = accumulator["plots"]
+        plot_dir = os.path.join(output_dir, "plots")
+        os.makedirs(plot_dir, exist_ok=True)
+
+        for plottable in self.plottables:
+            output_file = os.path.join(
+                plot_dir, f"{slugify(plottable.label)}.{extension}"
+            )
+            plottable.plot_histogram(
+                histogram=plots[plottable.label],
+                metadata=metadata,
+                title=plottable.label,
+                output_file=output_file,
+            )
 
 
 def stacked_colors(num: int) -> list[str]:

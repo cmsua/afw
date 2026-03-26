@@ -1,3 +1,3 @@
-from .cli.entrypoint import run
+from .entrypoint import run
 
 run()
