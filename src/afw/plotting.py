@@ -208,7 +208,7 @@ class Arbitrary(Plottable):
             )
         elif self.hist_type == "discrete":
             axis = hist.axis.Variable(
-                self.bin_values, name="values", label=self.labels
+                self.bin_values, name="values", label=self.label
             )
         else:
             raise ValueError(
