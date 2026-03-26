@@ -156,7 +156,8 @@ class ProcessEventsNonSkimming(ProcessEvents):
 
 
 class ProcessEventsSkimming(ProcessEvents):
-    def __init__(self, **kwargs):
+    def __init__(self, batch: bool = False, **kwargs):
+        self.batch = batch
         super().__init__(**kwargs)
 
     def process(
@@ -190,7 +191,7 @@ class ProcessEventsSkimming(ProcessEvents):
 
         # After skimming, handle saving
         skim_write_objs = []
-        acc_dict = []
+        acc_list = []
         for fileset_name, (skimmed_fileset, acc) in skimmed_dict.items():
             logger.debug(f"Computing task graph for {fileset_name}")
             skimmed_writable = uproot_writeable(skimmed_fileset)
@@ -205,11 +206,17 @@ class ProcessEventsSkimming(ProcessEvents):
                 destination=destination,
             )
             skim_write_objs += [process]
-            acc_dict += [acc]
+            acc_list += [acc]
 
         # Compute
         logger.info("Processing")
-        _, result = dask.compute(skim_write_objs, acc_dict)
+        if self.batch:
+            _, result = dask.compute(skim_write_objs, acc_list)
+        else:
+            result = []
+            for skim_write_obj, acc in zip(skim_write_objs, acc_list):
+                _, acc = dask.compute(skim_write_obj, acc)
+                result += [acc]
 
         # Postprocess
         result = accumulate(result)
