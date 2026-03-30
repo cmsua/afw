@@ -7,6 +7,7 @@ import tqdm
 
 from . import utils
 from .objects import AnalysisConfig
+import dask
 from dask.distributed import Client
 
 logger = logging.getLogger("entrypoint")
@@ -70,7 +71,7 @@ def run():
         "-C",
         "--cluster-address",
         help="Cluster to use for processing",
-        default=os.environ.get("CLUSTER_ADDRESS", "tls://localhost:8786"),
+        default=os.environ.get("CLUSTER_ADDRESS", None),
     )
     parser.add_argument(
         "-n",
@@ -131,8 +132,7 @@ def run():
     # Run said option
     # Dask Client
     # Do this before overriding the config
-    if "cluster_address" in args:
-        args.client = create_dask_client(args.cluster_address, [args.config])
+    args.client = create_dask_client(args.cluster_address, [args.config])
 
     args_dict = vars(args)
     logger.debug(f"Using args {args_dict}")
@@ -151,32 +151,28 @@ def run():
 
 ## Dask Cluster Util
 # Returns Client, Cluster
-def create_dask_client(cluster_address: str, upload_files: list[str] = []):
+def create_dask_client(
+    cluster_address_override: str | None = None, upload_files: list[str] = []
+):
     """
     Creates a Dask client and optionally uploads required Python code.
 
-    Supported clients:
-    - 'local': Spawns a dask.distributed.LocalCluster. This cluster does not support file upload.
-    - 'gateway': Connects to a dask_gateway.GatewayCluster if present (create using the Dask LabExtension interface)
-    - A Dask scheduler located at tcp://your-ip-here:port, such as included in coffea.casa or SWAN
+    If a cluster is not specified, this function will fall back to ``labextension.factory.module`` if set, or ``LocalCluster`` otherwise.
 
     The following files will be uploaded if set: configs/\*.py, processor.py
 
     Parameters:
-        cluster_address(str): One of the above supported clients
+        cluster_address_override (str): One of the above supported clients
         upload_files (list[str], default []):  Local python files to upload to the Dask client
 
     Returns:
         dask.distributed.Client: A Dask client
     """
-    if cluster_address == "local":
-        upload = False
+    module = dask.config.get("labextension.factory.module", None)
+    initial = dask.config.get("labextension.factory.initial", None)
 
-        from dask.distributed import LocalCluster
-
-        cluster = LocalCluster()
-        client = cluster.get_client()
-    elif cluster_address == "gateway":
+    # Gateway override or gateway config'd
+    if cluster_address_override == "gateway" or module == "dask_gateway":
         upload = False
 
         logger.debug("Connecting to gateway")
@@ -190,19 +186,39 @@ def create_dask_client(cluster_address: str, upload_files: list[str] = []):
         logger.debug("Fetching cluster {cluters[0].name}")
         cluster = gateway.connect(clusters[0].name)
         client = Client(cluster, timeout=60)
-    else:
+
+    # Other overrides
+    elif cluster_address_override is not None:
+        # Local override
+        if cluster_address_override == "local":
+            upload = False
+            from dask.distributed import LocalCluster
+
+            cluster = LocalCluster()
+            client = cluster.get_client()
+        # TLS override
+        elif "tls" in cluster_address_override:
+            upload = True
+
+            logger.debug(f"Connecting to cluster due to tls override at {cluster_address_override}")
+            client = Client(cluster_address_override)
+        else:
+            raise ValueError(f"Invalid override {cluster_address_override}")
+    # Cluster is present
+    elif initial is not None:
         upload = True
 
-        logger.debug(f"Connecting to cluster at {cluster_address}")
-        client = Client(cluster_address)
+        logger.debug("Connecting to presumed present cluster at tls://localhost:8787/")
+        client = Client("tls://localhost:8787/")
+    else:
+        raise ValueError("Could not find cluster!")
 
+    # Upload Files
     if upload:
-        # Upload Files
         logger.debug("Uploading files to workers...")
         for file in upload_files:
             logger.debug(f"Uploading file {file}")
             client.upload_file(file)
-
     else:
         logger.warning("Skipping upload files to workers")
 
