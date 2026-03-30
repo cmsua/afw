@@ -171,8 +171,10 @@ def create_dask_client(
     module = dask.config.get("labextension.factory.module", None)
     initial = dask.config.get("labextension.factory.initial", None)
 
-    # Gateway override or gateway config'd
-    if cluster_address_override == "gateway" or module == "dask_gateway":
+    # Gateway override or gateway config'd and no override
+    if cluster_address_override == "gateway" or (
+        module == "dask_gateway" and cluster_address_override is None
+    ):
         upload = False
 
         logger.debug("Connecting to gateway")
@@ -200,7 +202,9 @@ def create_dask_client(
         elif "tls" in cluster_address_override:
             upload = True
 
-            logger.debug(f"Connecting to cluster due to tls override at {cluster_address_override}")
+            logger.debug(
+                f"Connecting to cluster due to tls override at {cluster_address_override}"
+            )
             client = Client(cluster_address_override)
         else:
             raise ValueError(f"Invalid override {cluster_address_override}")
