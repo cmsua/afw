@@ -59,7 +59,13 @@ class FillHistograms(MicroProcessorABC):
 
 
 class SaveHistograms(Stage):
-    def __init__(self, name: str, plottables: list[Plottable], dataset: dict | Callable, accumulator: dict|Callable):
+    def __init__(
+        self,
+        name: str,
+        plottables: list[Plottable],
+        dataset: dict | Callable,
+        accumulator: dict | Callable,
+    ):
         super().__init__(name=name)
         self.plottables = plottables
 
@@ -80,8 +86,6 @@ class SaveHistograms(Stage):
         for key, val in dataset.items():
             name = val["metadata"]["shortName"]
             metadata[name] = val["metadata"]
-
-        
 
         plots = accumulator["plots"]
         plot_dir = os.path.join(output_dir, "plots")
@@ -163,6 +167,7 @@ class Arbitrary(Plottable):
         high_bin: float = None,
         # For hist_type == "discrete"
         bin_values: list = None,
+        rebin_slice=None,
     ):
         """
         Args:
@@ -175,6 +180,7 @@ class Arbitrary(Plottable):
             low_bin (int, default None): If ``hist_type == "continuous"``, the lower bound for bins
             high_bin (int, default None): If ``hist_type == "continuous"``, the upper bound for bins
             bin_values (list, default None): If ``hist_type == "discrete"``, the possible values present for each bin
+            rebin_slice (slice, default None): The rebinning method to use before plotting
 
         """
         super().__init__(label=label)
@@ -196,6 +202,8 @@ class Arbitrary(Plottable):
         elif hist_type == "discrete":
             self.bin_values = bin_values
 
+        self.rebin_slice = rebin_slice
+
     def create_histogram(self) -> hist.Hist:
         # Create the Boost histogram from called parameters
         if self.hist_type == "continuous":
@@ -207,9 +215,7 @@ class Arbitrary(Plottable):
                 label=self.label,
             )
         elif self.hist_type == "discrete":
-            axis = hist.axis.Variable(
-                self.bin_values, name="values", label=self.label
-            )
+            axis = hist.axis.Variable(self.bin_values, name="values", label=self.label)
         else:
             raise ValueError(
                 "self.hist_type was changed between __init__ and create_histogram!"
@@ -243,11 +249,11 @@ class Arbitrary(Plottable):
         data_fields = [field for field in data_fields if field in histogram.axes[0]]
         mc_keys = [field for field in mc_keys if field in histogram.axes[0]]
 
-        data = histogram[data_fields, :][sum, :]
+        data = histogram[data_fields, :][sum, self.rebin_slice]
 
         signal_keys = [key for key, val in metadata.items() if val.get("signal", False)]
         stacked_keys = [key for key in mc_keys if key not in signal_keys]
-        stacked_histos = [histogram[key, :] for key in stacked_keys]
+        stacked_histos = [histogram[key, self.rebin_slice] for key in stacked_keys]
 
         # DISABLED: This can vary between plots!
         # pairs = zip(stacked_keys, stacked_histos)
@@ -272,7 +278,10 @@ class Arbitrary(Plottable):
         # Add Signal
         for signal_key in signal_keys:
             hep.histplot(
-                histogram[signal_key, :], ax=ax_main, label=signal_key, color="#000000"
+                histogram[signal_key, self.rebin_slice],
+                ax=ax_main,
+                label=signal_key,
+                color="#000000",
             )
 
         # Add Second Comp
@@ -301,13 +310,19 @@ class NJets(Arbitrary):
     Plot a the number of jets in each event
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs: dict):
+        """
+        Parameters:
+            **kwargs (dict): Any arguments to overwrite
+        """
         super().__init__(
             label="NJets",
             units="Jet",
             fetch_data=lambda events: ak.num(events.Jet),
             hist_type="discrete",
             bin_values=list(range(0, 16)),
+            rebin_slice=slice(None, None),
+            **kwargs,
         )
 
 
@@ -316,11 +331,12 @@ class Discriminant(Arbitrary):
     Plot a discriminant (a float ranging from 0 to 1) such as DeepJet Score
     """
 
-    def __init__(self, label: str, fetch_data: Callable):
+    def __init__(self, label: str, fetch_data: Callable, **kwargs: dict):
         """
         Parameters:
             label (str): The label of the overall plot.
             fetch_data (typing.Callable): Given ``events``, returns the discriminant
+            **kwargs (dict): Any arguments to overwrite
         """
         super().__init__(
             label=label,
@@ -330,6 +346,8 @@ class Discriminant(Arbitrary):
             n_bins=500,
             low_bin=0,
             high_bin=1,
+            rebin_slice=slice(None, None, 10j),
+            **kwargs,
         )
 
 
@@ -340,11 +358,12 @@ class Pt(Arbitrary):
     No check is done to ensure the given lepton is present. Non-present leptons will result in a crash.
     """
 
-    def __init__(self, label: str, fetch_data: Callable):
+    def __init__(self, label: str, fetch_data: Callable, **kwargs: dict):
         """
         Parameters:
             label (str): The label of the overall plot.
             fetch_data (typing.Callable): Given ``events``, returns the pt to plot
+            **kwargs (dict): Any arguments to overwrite
         """
         super().__init__(
             label=label,
@@ -354,6 +373,8 @@ class Pt(Arbitrary):
             n_bins=500,
             low_bin=0,
             high_bin=500,
+            rebin_slice=slice(None, None, 10j),
+            **kwargs,
         )
 
 
@@ -362,11 +383,12 @@ class Eta(Arbitrary):
     Plot the eta of a given object.
     """
 
-    def __init__(self, label: str, fetch_data: Callable):
+    def __init__(self, label: str, fetch_data: Callable, **kwargs: dict):
         """
         Parameters:
             label (str): The label of the overall plot.
             fetch_data (typing.Callable): Given ``events``, returns the pt to plot
+            **kwargs (dict): Any arguments to overwrite
         """
         super().__init__(
             label=label,
@@ -376,6 +398,8 @@ class Eta(Arbitrary):
             n_bins=500,
             low_bin=-5,
             high_bin=5,
+            rebin_slice=slice(None, None, 10j),
+            **kwargs,
         )
 
 
@@ -386,11 +410,12 @@ class DileptonMass(Arbitrary):
     No check is done to ensure the given lepton is present. Non-present leptons will result in a crash.
     """
 
-    def __init__(self, label: str, fetch_data: Callable):
+    def __init__(self, label: str, fetch_data: Callable, **kwargs):
         """
         Parameters:
             label (str): The label of the overall plot.
             fetch_data (Callable): Returns a tuple consisting of two lepton arrays
+            **kwargs (dict): Any arguments to overwrite
         """
 
         def calculate_mass(events):
@@ -410,4 +435,6 @@ class DileptonMass(Arbitrary):
             n_bins=500,
             low_bin=0,
             high_bin=1000,
+            rebin_slice=slice(None, None, 10j),
+            **kwargs,
         )
