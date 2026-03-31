@@ -39,7 +39,7 @@ class FillHistograms(MicroProcessorABC):
         result = {}
         for plottable in self.plottables:
             # Use mask if present
-            if plottable.where is not None:
+            if hasattr(plottable, "where") and plottable.where is not None:
                 mask = plottable.where(events)
                 result[plottable.label] = plottable.fill_histogram(
                     plottable.create_histogram(),
