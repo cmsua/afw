@@ -34,7 +34,7 @@ class FillHistograms(MicroProcessorABC):
         self.compute_weights = compute_weights
 
     def process(
-        self, events: ak.Array, prev_accumulator: dict
+        self, events: ak.Array, accumulator: dict
     ) -> tuple[ak.Array, dict]:
         result = {}
         for plottable in self.plottables:
@@ -45,17 +45,18 @@ class FillHistograms(MicroProcessorABC):
                     plottable.create_histogram(),
                     events[mask],
                     events.metadata["shortName"],
-                    self.compute_weights(events[mask], prev_accumulator),
+                    self.compute_weights(events[mask], accumulator),
                 )
             else:
                 result[plottable.label] = plottable.fill_histogram(
                     plottable.create_histogram(),
                     events,
                     events.metadata["shortName"],
-                    self.compute_weights(events, prev_accumulator),
+                    self.compute_weights(events, accumulator),
                 )
 
-        return events, {"plots": result}
+        accumulator["plots"] = result
+        return events, accumulator
 
 
 class SaveHistograms(Stage):
