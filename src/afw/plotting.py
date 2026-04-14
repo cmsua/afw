@@ -123,17 +123,23 @@ class HistogramParameters:
     """Represents a histogram with any given number of axis"""
 
     def __init__(
-        self, name: str, axis: list[AxisParameters], predicate: callable = None
+        self,
+        name: str,
+        axis: list[AxisParameters],
+        predicate: callable = None,
+        rebin_slice: slice = slice(None, None, 10j),
     ):
         """
         Args:
             name (str): The internal name of the histogram
             axis (list[AxisParameters]): Parameters for each axis of the histogram
             predicate (callable, default None): If present, the condition required for this histogram to be filled
+            rebin_slice (slice): The rebin slice to use when plotting
         """
         self.name = name
         self.axis = axis
         self.predicate = predicate
+        self.rebin_slice = rebin_slice
 
     def fill_histogram(
         self,
