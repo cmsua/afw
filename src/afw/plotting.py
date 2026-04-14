@@ -226,7 +226,7 @@ class SingleAxisHistogramParameters(HistogramParameters):
             sum(stacked_histos),
             ax_comparison_2,
             comparison="relative_difference",
-            xlabel=self.label,
+            xlabel=self.name,
         )
 
         # Log Scale
