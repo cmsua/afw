@@ -312,7 +312,7 @@ class SaveHistograms(Stage):
         plot_dir = os.path.join(output_dir, "plots")
         os.makedirs(plot_dir, exist_ok=True)
 
-        for histogram in self.histogram:
+        for histogram in self.histograms:
             output_file = os.path.join(
                 plot_dir, f"{slugify(histogram.label)}.{extension}"
             )
