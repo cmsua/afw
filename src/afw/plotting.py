@@ -314,6 +314,6 @@ class SaveHistograms(Stage):
 
         for histogram in self.histograms:
             output_file = os.path.join(
-                plot_dir, f"{slugify(histogram.label)}.{extension}"
+                plot_dir, f"{slugify(histogram.name)}.{extension}"
             )
-            histogram.plot_histogram(plots[histogram.label], output_file, metadata)
+            histogram.plot_histogram(plots[histogram.name], output_file, metadata)
