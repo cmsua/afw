@@ -127,19 +127,16 @@ class HistogramParameters:
         name: str,
         axis: list[AxisParameters],
         predicate: callable = None,
-        rebin_slice: slice = slice(None, None, 10j),
     ):
         """
         Args:
             name (str): The internal name of the histogram
             axis (list[AxisParameters]): Parameters for each axis of the histogram
             predicate (callable, default None): If present, the condition required for this histogram to be filled
-            rebin_slice (slice): The rebin slice to use when plotting
         """
         self.name = name
         self.axis = axis
         self.predicate = predicate
-        self.rebin_slice = rebin_slice
 
     def fill_histogram(
         self,
@@ -166,10 +163,17 @@ class HistogramParameters:
 
 
 class SingleAxisHistogramParameters(HistogramParameters):
-    def __init__(self, **kwargs: dict):
+    def __init__(self, rebin_slice: slice=slice(None, None, 10j), units: str = "Units", **kwargs: dict):
+        """
+        Args:
+            rebin_slice (slice, default None, None, 10j): The rebin slice to use when plotting
+            units (str): The bin width units
+        """
         super().__init__(
             name=kwargs["name"], axis=[DATASET_AXIS, AxisParameters(**kwargs)]
         )
+        self.rebin_slice = rebin_slice
+        self.units = units
 
     def plot_histogram(
         self, histogram: hist.Hist, output_file: str, metadata: dict
