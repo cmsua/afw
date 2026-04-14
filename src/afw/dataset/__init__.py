@@ -1,11 +1,9 @@
+import logging
+import os
+
+from ..utils_internal import slugify
 from . import cached
 from .definitions import build_datasets
-
-import logging
-
-import os
-from ..utils import slugify
-
 
 logger = logging.getLogger("dataset")
 

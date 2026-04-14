@@ -2,106 +2,15 @@
 A utility module containing commonly-plotted things
 """
 
+import os
+from enum import Enum
+
 import awkward as ak
 import hist
 import mplhep as hep
-import numpy as np
-import os
 
-from typing import Callable
-from .objects import Plottable, MicroProcessorABC, Stage
-from .utils import slugify
-
-
-class FillHistograms(MicroProcessorABC):
-    """
-    The final step in the analysis, which computes weights and fills histograms
-    """
-
-    def __init__(
-        self,
-        plottables: list[Plottable],
-        compute_weights: Callable,
-    ):
-        """
-        Args:
-            plottables (list[Plottable]): A list of all plottables
-            compute_weights (Callable): Accepts events and prev_accumulator and returns an ``ak.Array`` of weights
-        """
-        super().__init__()
-
-        self.plottables = plottables
-        self.compute_weights = compute_weights
-
-    def process(
-        self, events: ak.Array, accumulator: dict
-    ) -> tuple[ak.Array, dict]:
-        result = {}
-        for plottable in self.plottables:
-            # Use mask if present
-            if hasattr(plottable, "where") and plottable.where is not None:
-                mask = plottable.where(events)
-                result[plottable.label] = plottable.fill_histogram(
-                    plottable.create_histogram(),
-                    events[mask],
-                    events.metadata["shortName"],
-                    self.compute_weights(events[mask], accumulator),
-                )
-            else:
-                result[plottable.label] = plottable.fill_histogram(
-                    plottable.create_histogram(),
-                    events,
-                    events.metadata["shortName"],
-                    self.compute_weights(events, accumulator),
-                )
-
-        accumulator["plots"] = result
-        return events, accumulator
-
-
-class SaveHistograms(Stage):
-    def __init__(
-        self,
-        name: str,
-        plottables: list[Plottable],
-        dataset: dict | Callable,
-        accumulator: dict | Callable,
-    ):
-        super().__init__(name=name)
-        self.plottables = plottables
-
-        self.dataset = dataset
-        self.accumulator = accumulator
-
-    def run(self, output_dir: str, extension: str, **kwargs: dict):
-        dataset = self.dataset
-        if callable(dataset):
-            dataset = dataset(**{"output_dir": output_dir, **kwargs})
-
-        accumulator = self.accumulator
-        if callable(accumulator):
-            accumulator = accumulator(**{"output_dir": output_dir, **kwargs})
-
-        # Get metadata
-        metadata = {}
-        for key, val in dataset.items():
-            name = val["metadata"]["shortName"]
-            metadata[name] = val["metadata"]
-
-        plots = accumulator["plots"]
-        plot_dir = os.path.join(output_dir, "plots")
-        os.makedirs(plot_dir, exist_ok=True)
-
-        for plottable in self.plottables:
-            output_file = os.path.join(
-                plot_dir, f"{slugify(plottable.label)}.{extension}"
-            )
-            plottable.plot_histogram(
-                histogram=plots[plottable.label],
-                metadata=metadata,
-                title=plottable.label,
-                output_file=output_file,
-            )
+from .objects import MicroProcessorABC, Stage
+from .utils_internal import slugify
 
 
 def stacked_colors(num: int) -> list[str]:
@@ -127,121 +36,137 @@ def stacked_colors(num: int) -> list[str]:
     return colors[0:num]
 
 
-def create_single_axis_histogram(axis: hist.axis.AxesMixin) -> hist.Hist:
+class AxisType(Enum):
     """
-    Creates a hist.Hist with a dataset axis and weights, alongside a given axis
-
-    Parameters:
-        axis (hist.Axis) - The given axis to create a histogram with
-
-    Returns:
-        hist.Hist: A histogram with the given axis as well as a dataset axis and weight storage
+    Type of axis
     """
-    dataset_axis = hist.axis.StrCategory(
-        [], name="dataset", label="Process", growth=True
-    )
 
-    return hist.Hist(
-        dataset_axis,
-        axis,
-        storage=hist.storage.Weight(),
-    )
+    DISCRETE = "discrete"
+    CONTINUOUS = "continuous"
+    BOOLEAN = "boolean"
+    STRING = "string"
 
 
-class Arbitrary(Plottable):
+class AxisParameters:
     """
-    Plots some arbitrary thing.
+    Parameters for any given axis of a histogram
     """
 
     def __init__(
         self,
-        # Essential
+        name: str,
         label: str,
-        units: str,
-        fetch_data: Callable,
-        where: Callable | None = None,
-        # Type: "continuous", "discrete"
-        hist_type: str = "continuous",
-        # For hist_type == "continuous"
-        n_bins: int = None,
-        low_bin: float = None,
-        high_bin: float = None,
-        # For hist_type == "discrete"
+        axis_type: AxisType,
+        fetch_data: callable,
         bin_values: list = None,
-        rebin_slice=None,
+        n_bins: int = None,
+        low_bin: int = 0,
+        high_bin: int = None,
     ):
         """
         Args:
+            name (str): The internal name of the axis in the histogram
             label (str): The label on the x-axis of the chart
-            units (str): The units of bin width
-            fetch_data (Callable): Given ``events``, returns the values to be plotted. This should not include the ``where`` filter if present.
-            where (Callable): Given ``events``, returns a mask of events to process.
-            hist_type (str): One of ``"continuous"`` or ``"discrete"``
-            n_bins (int, default None): If ``hist_type == "continuous"``, the number of bins present
-            low_bin (int, default None): If ``hist_type == "continuous"``, the lower bound for bins
-            high_bin (int, default None): If ``hist_type == "continuous"``, the upper bound for bins
-            bin_values (list, default None): If ``hist_type == "discrete"``, the possible values present for each bin
-            rebin_slice (slice, default None): The rebinning method to use before plotting
-
+            axis_type (str): A given ``AxisType``
+            fetch_data (Callable): Given ``events`` and ``accumulator``, returns the values to be plotted. This should not include the ``where`` filter if present.
+            n_bins (int, default None): If ``axis_type == AxisType.CONTINUOUS``, the number of bins present
+            low_bin (int, default None): If ``axis_type == AxisType.CONTINUOUS``, the lower bound for bins
+            high_bin (int, default None): If ``axis_type == AxisType.CONTINUOUS``, the upper bound for bins
+            bin_values (list, default None): If ``axis_type == AxisType.DISCRETE``, the possible values present for each bin
         """
-        super().__init__(label=label)
-
-        self.units = units
+        self.name = name
+        self.label = label
+        self.axis_type = axis_type
         self.fetch_data = fetch_data
-        self.where = where
+        self.bin_values = bin_values
+        self.n_bins = n_bins
+        self.low_bin = low_bin
+        self.high_bin = high_bin
+        pass
 
-        self.hist_type = hist_type
-        assert hist_type == "continuous" or hist_type == "discrete"
-
-        if hist_type == "continuous":
-            self.n_bins = n_bins
-            self.low_bin = low_bin
-            self.high_bin = high_bin
-            assert n_bins is not None
-            assert low_bin is not None
-            assert high_bin is not None
-        elif hist_type == "discrete":
-            self.bin_values = bin_values
-
-        self.rebin_slice = rebin_slice
-
-    def create_histogram(self) -> hist.Hist:
-        # Create the Boost histogram from called parameters
-        if self.hist_type == "continuous":
-            axis = hist.axis.Regular(
-                self.n_bins,
-                self.low_bin,
-                self.high_bin,
-                name="values",
-                label=self.label,
+    def build_axis(self):
+        """Build the given axis at runtime"""
+        if self.axis_type == AxisType.CONTINUOUS:
+            if self.bin_values is not None:
+                return hist.axis.Variable(
+                    self.bin_values, name=self.name, label=self.label
+                )
+            else:
+                return hist.axis.Regular(
+                    self.n_bins,
+                    self.low_bin,
+                    self.high_bin,
+                    name=self.name,
+                    label=self.label,
+                )
+        elif self.axis_type == AxisType.DISCRETE:
+            return hist.axis.IntCategory(
+                self.bin_values, name=self.name, label=self.label
             )
-        elif self.hist_type == "discrete":
-            axis = hist.axis.Variable(self.bin_values, name="values", label=self.label)
-        else:
-            raise ValueError(
-                "self.hist_type was changed between __init__ and create_histogram!"
+        elif self.axis_type == AxisType.BOOLEAN:
+            return hist.axis.Boolean(name=self.name, label=self.label)
+        elif self.axis_type == AxisType.STRING:
+            return hist.axis.StrCategory(
+                [], name=self.name, label=self.label, growth=True
             )
-        return create_single_axis_histogram(axis)
+
+
+DATASET_AXIS = AxisParameters(
+    name="dataset",
+    label="Process",
+    axis_type=AxisType.STRING,
+    fetch_data=lambda events, **kwargs: events.metadata["shortName"],
+)
+
+
+class HistogramParameters:
+    """Represents a histogram with any given number of axis"""
+
+    def __init__(
+        self, name: str, axis: list[AxisParameters], predicate: callable = None
+    ):
+        """
+        Args:
+            name (str): The internal name of the histogram
+            axis (list[AxisParameters]): Parameters for each axis of the histogram
+            predicate (callable, default None): If present, the condition required for this histogram to be filled
+        """
+        self.name = name
+        self.axis = axis
+        self.predicate = predicate
 
     def fill_histogram(
         self,
-        histogram: hist.Hist,
         events: ak.Array,
-        dataset: str,
-        weights: ak.Array,
-        **kwargs: dict[ak.Array],
+        weight: ak.Array = None,
+        **kwargs: dict,
     ) -> hist.Hist:
-        histogram.fill(
-            dataset=dataset, values=self.fetch_data(events, **kwargs), weight=weights
+        histogram = hist.Hist(
+            *[axis.build_axis() for axis in self.axis],
+            storage=hist.storage.Weight(),
         )
+
+        parameters = {}
+        for axis in self.axis:
+            parameters[axis.name] = axis.fetch_data(events, **kwargs)
+
+        histogram.fill(**parameters, weight=weight)
         return histogram
 
     def plot_histogram(
-        self,
-        histogram: hist.Hist,
-        metadata: dict,
-        title: str,
-        output_file: str,
+        self, histogram: hist.Hist, output_file: str, metadata: dict
+    ) -> None:
+        raise NotImplementedError()
+
+
+class SingleAxisHistogramParameters(HistogramParameters):
+    def __init__(self, **kwargs: dict):
+        super().__init__(
+            name=kwargs["name"], axis=[DATASET_AXIS, AxisParameters(**kwargs)]
+        )
+
+    def plot_histogram(
+        self, histogram: hist.Hist, output_file: str, metadata: dict
     ) -> None:
         data_fields = [key for key, val in metadata.items() if val.get("isData", True)]
         mc_keys = [field for field in histogram.axes[0] if field not in data_fields]
@@ -296,7 +221,7 @@ class Arbitrary(Plottable):
 
         # Log Scale
         ax_main.set_yscale("log")
-        ax_main.set_title(title)
+        ax_main.set_title(self.name)
 
         # Label
         hep.cms.label(
@@ -306,136 +231,94 @@ class Arbitrary(Plottable):
         fig.savefig(output_file)
 
 
-class NJets(Arbitrary):
+class FillHistograms(MicroProcessorABC):
     """
-    Plot a the number of jets in each event
-    """
-
-    def __init__(self, **kwargs: dict):
-        """
-        Parameters:
-            **kwargs (dict): Any arguments to overwrite
-        """
-        super().__init__(
-            label="NJets",
-            units="Jet",
-            fetch_data=lambda events: ak.num(events.Jet),
-            hist_type="discrete",
-            bin_values=list(range(0, 16)),
-            rebin_slice=slice(None, None),
-            **kwargs,
-        )
-
-
-class Discriminant(Arbitrary):
-    """
-    Plot a discriminant (a float ranging from 0 to 1) such as DeepJet Score
+    Fills a given number of histograms
     """
 
-    def __init__(self, label: str, fetch_data: Callable, **kwargs: dict):
+    def __init__(
+        self,
+        histograms: list[HistogramParameters],
+        fill_extra_parameters: callable = None,
+    ):
         """
-        Parameters:
-            label (str): The label of the overall plot.
-            fetch_data (typing.Callable): Given ``events``, returns the discriminant
-            **kwargs (dict): Any arguments to overwrite
+        Args:
+            histograms (list[HistogramParameters]): A list of all histograms to fill
+            fill_extra_parameters (callable, default None): Accepts ``events``, ``accumulator``, and returns values to pass to histograms during filling
         """
-        super().__init__(
-            label=label,
-            units="Units",
-            fetch_data=fetch_data,
-            hist_type="continuous",
-            n_bins=500,
-            low_bin=0,
-            high_bin=1,
-            rebin_slice=slice(None, None, 10j),
-            **kwargs,
-        )
+        self.histograms = histograms
+        self.fill_extra_parameters = fill_extra_parameters
+
+    def process(self, events: ak.Array, accumulator: dict) -> tuple[ak.Array, dict]:
+        if self.fill_extra_parameters is not None:
+            extra_parameters = self.fill_extra_parameters(events, accumulator)
+        else:
+            extra_parameters = {}
+
+        extra_parameters["accumulator"] = accumulator
+
+        result = {}
+        for histogram in self.histograms:
+            # If predicate is present and returns false, skip
+            if histogram.predicate is not None and not histogram.predicate(events):
+                continue
+
+            try:
+                result[histogram.name] = histogram.fill_histogram(
+                    events, **extra_parameters
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed filling histogram {histogram.name} with exception", e
+                )
+
+        accumulator["plots"] = result
+        return events, accumulator
 
 
-class Pt(Arbitrary):
+class SaveHistograms(Stage):
     """
-    Plot the pT of a given object.
-
-    No check is done to ensure the given lepton is present. Non-present leptons will result in a crash.
-    """
-
-    def __init__(self, label: str, fetch_data: Callable, **kwargs: dict):
-        """
-        Parameters:
-            label (str): The label of the overall plot.
-            fetch_data (typing.Callable): Given ``events``, returns the pt to plot
-            **kwargs (dict): Any arguments to overwrite
-        """
-        super().__init__(
-            label=label,
-            units="GeV",
-            fetch_data=fetch_data,
-            hist_type="continuous",
-            n_bins=500,
-            low_bin=0,
-            high_bin=500,
-            rebin_slice=slice(None, None, 10j),
-            **kwargs,
-        )
-
-
-class Eta(Arbitrary):
-    """
-    Plot the eta of a given object.
+    Saves a given number of histograms
     """
 
-    def __init__(self, label: str, fetch_data: Callable, **kwargs: dict):
-        """
-        Parameters:
-            label (str): The label of the overall plot.
-            fetch_data (typing.Callable): Given ``events``, returns the pt to plot
-            **kwargs (dict): Any arguments to overwrite
-        """
-        super().__init__(
-            label=label,
-            units="Radians",
-            fetch_data=fetch_data,
-            hist_type="continuous",
-            n_bins=500,
-            low_bin=-5,
-            high_bin=5,
-            rebin_slice=slice(None, None, 10j),
-            **kwargs,
-        )
+    def __init__(
+        self,
+        name: str,
+        histograms: list[HistogramParameters],
+        dataset: dict,
+        accumulator: callable,
+    ):
+        super().__init__(name=name)
+        self.histograms = histograms
+        self.dataset = dataset
+        self.accumulator = accumulator
 
+    def run(self, output_dir: str, extension: str, **kwargs: dict):
+        dataset = self.dataset
+        if callable(dataset):
+            dataset = dataset(**{"output_dir": output_dir, **kwargs})
 
-class DileptonMass(Arbitrary):
-    """
-    Plot the dilepton mass of two leptons. The order doesn't matter due to the cos and cosh functions being even.
+        accumulator = self.accumulator
+        if callable(accumulator):
+            accumulator = accumulator(**{"output_dir": output_dir, **kwargs})
 
-    No check is done to ensure the given lepton is present. Non-present leptons will result in a crash.
-    """
+        # Get metadata
+        metadata = {}
+        for key, val in dataset.items():
+            name = val["metadata"]["shortName"]
+            metadata[name] = val["metadata"]
 
-    def __init__(self, label: str, fetch_data: Callable, **kwargs):
-        """
-        Parameters:
-            label (str): The label of the overall plot.
-            fetch_data (Callable): Returns a tuple consisting of two lepton arrays
-            **kwargs (dict): Any arguments to overwrite
-        """
+        plots = accumulator["plots"]
+        plot_dir = os.path.join(output_dir, "plots")
+        os.makedirs(plot_dir, exist_ok=True)
 
-        def calculate_mass(events):
-            obj_1, obj_2 = fetch_data(events)
-            return np.sqrt(
-                2
-                * obj_1.pt
-                * obj_2.pt
-                * (np.cosh(obj_1.eta - obj_2.eta) - np.cos(obj_1.phi - obj_2.phi))
+        for plottable in self.plottables:
+            output_file = os.path.join(
+                plot_dir, f"{slugify(plottable.label)}.{extension}"
             )
-
-        super().__init__(
-            label=label,
-            units="GeV",
-            fetch_data=calculate_mass,
-            hist_type="continuous",
-            n_bins=500,
-            low_bin=0,
-            high_bin=1000,
-            rebin_slice=slice(None, None, 10j),
-            **kwargs,
-        )
+            plottable.plot_histogram(
+                histogram=plots[plottable.label],
+                metadata=metadata,
+                title=plottable.label,
+                output_file=output_file,
+            )

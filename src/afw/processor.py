@@ -21,7 +21,7 @@ from coffea.processor import (
 from dask.distributed import Client
 
 from .objects import MicroProcessorABC, Stage
-from .utils import slugify
+from .utils_internal import slugify
 
 logger = logging.getLogger("Stages")
 
@@ -97,6 +97,8 @@ class ProcessEvents(Stage):
         with open(output_file, "wb") as file:
             pickle.dump(result, file)
 
+        return result
+
     @abc.abstractmethod
     def process(self, dataset: dict, accumulator: dict, **kwargs: dict):
         pass
@@ -146,15 +148,12 @@ class ProcessEventsNonSkimming(ProcessEvents):
 
         logger.debug(f"Got result from compute: {result}")
 
-        # Save
-
         # Print metrics
         logger.info(f"Processed {report['bytesread'] / 1e9:.3f} GB")
         logger.info(f"Processed {report['bytesread'] / 1e9 / elapsed:.3f} GB/sec")
         logger.info(f"Processed {report['entries']:>15,.0f} events")
         logger.info(f"Processed {report['entries'] / (elapsed):>15,.0f} events/s")
         return result
-
 
 class ProcessEventsSkimming(ProcessEvents):
     def __init__(self, batch: bool = False, **kwargs):

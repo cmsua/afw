@@ -3,12 +3,12 @@ import importlib
 import logging
 import os
 import sys
-import tqdm
 
-from . import utils
-from .objects import AnalysisConfig
 import dask
+import tqdm
 from dask.distributed import Client
+
+from .utils_internal import setup_logging
 
 logger = logging.getLogger("entrypoint")
 
@@ -23,7 +23,6 @@ def run():
 
     # RUNTIME
     parser.add_argument("config", help="The config file to load", type=str)
-    parser.add_argument("cls", help="The class in the config to load", type=str)
     parser.add_argument(
         "option", help="The option to run in the given config", type=str
     )
@@ -98,27 +97,18 @@ def run():
     args = parser.parse_args()
 
     # Logging
-    utils.setup_logging(args.debug)
+    setup_logging(args.debug)
 
     # Select config
-    configs = get_configs(args.config)
-    config_map = {}
-    for config in configs:
-        config_map[config.name] = config
-
-    if args.cls not in config_map:
-        logger.critical(f"Class {args.cls} not found in config! Valid classes:")
-        for cls_name in config_map:
-            logger.critical(f"- {cls_name}")
-        return
-    config = config_map[args.cls]
+    config = get_config(args.config)
 
     # Fix paths for this specific config
-    args.skim_dir = os.path.join(os.path.abspath(args.skim_dir), config.name)
-    args.output_dir = os.path.join(os.path.abspath(args.output_dir), config.name)
-
+    args.skim_dir = os.path.abspath(args.skim_dir)
+    args.output_dir = os.path.abspath(args.output_dir)
+    
     # Select option
-    options = config.get_options()
+    args_dict = vars(args)
+    options = config.get_options(**args_dict)
 
     # Check option is valid
     if args.option not in options:
@@ -134,7 +124,6 @@ def run():
     # Do this before overriding the config
     args.client = create_dask_client(args.cluster_address, [args.config])
 
-    args_dict = vars(args)
     logger.debug(f"Using args {args_dict}")
 
     try:
@@ -231,7 +220,7 @@ def create_dask_client(
 
 
 # Get config from ee, emu, mumu, or common (common is only used for skimming)
-def get_configs(file_path: str) -> list[AnalysisConfig]:
+def get_config(file_path: str):
     """
     Returns an analysis config from a given name. The file will be imported as the given module name.
 
@@ -247,6 +236,4 @@ def get_configs(file_path: str) -> list[AnalysisConfig]:
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
-
-    # Inspect module
-    return [cls() for cls in module.__all__]
+    return module

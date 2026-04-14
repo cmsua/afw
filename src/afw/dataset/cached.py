@@ -57,7 +57,7 @@ def persist_to_file(file_name: str):
     if os.path.exists(pickle_file):
         with open(pickle_file, "rb") as file:
             cache = pickle.load(file)
-            
+
         # Don't save _changed tag when a pickle exists
         if "_changed" in cache:
             del cache["_changed"]
@@ -245,7 +245,4 @@ def get_all_matching(das_template: str) -> list[dict]:
     logger.debug(f"Querying das with query {das_template}")
 
     response = run_dasgoclient(f"dataset={das_template}")
-    return [
-        it["dataset"][0]["name"]
-        for it in response
-    ]
+    return [it["dataset"][0]["name"] for it in response]
