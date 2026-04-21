@@ -1,4 +1,4 @@
-import afw.dataset.cached
+import afw.cached
 
 import magic
 
@@ -6,7 +6,7 @@ import magic
 # Check one file
 def test_xsecdb_lookup():
     process = magic.single_xsecdb_process_name
-    result, res_code = afw.dataset.cached.do_request(process)
+    result, res_code = afw.cached.do_request(process)
 
     assert res_code == 200
 
@@ -21,7 +21,7 @@ def test_xsecdb_lookup():
 # Check one cross section
 def test_get_cross_section_one():
     assert (
-        afw.dataset.cached.get_cross_section(
+        afw.cached.get_cross_section(
             magic.single_xsecdb_das_key
         )
         == magic.single_xsecdb_xsec
@@ -31,7 +31,7 @@ def test_get_cross_section_one():
 # Check with multiple xsecdb results for one DID
 def test_get_cross_section_multiple():
     assert (
-        afw.dataset.cached.get_cross_section(
+        afw.cached.get_cross_section(
             magic.multiple_xsecdb_das_key
         )
         == magic.multiple_xsecdb_xsec
@@ -40,10 +40,10 @@ def test_get_cross_section_multiple():
 ## Rucio
 def test_get_all_matching():
     # Use data as it never changes
-    result = afw.dataset.cached.get_all_matching(magic.data_das_key_template)
+    result = afw.cached.get_all_matching(magic.data_das_key_template)
     assert result == [magic.data_das_key]
 
 ## dasgoclient
 def test_dasgoclient():
-    result = afw.dataset.cached.run_dasgoclient(f"file dataset={magic.data_das_key}")
+    result = afw.cached.run_dasgoclient(f"file dataset={magic.data_das_key}")
     assert isinstance(result, list)

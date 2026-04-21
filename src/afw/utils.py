@@ -1,40 +1,22 @@
-import os
-import pickle
+"""
+Utilities for CLI tools
+"""
 
-from .dataset import to_skimmed
+import logging
+import re
+import unicodedata
 
-
-## Used to load things at runtime
-def load_from_skims(task_name: str, dataset: dict, **kwargs: dict):
+# Stolen from https://github.com/django/django/blob/master/django/utils/text.py
+def slugify(value):
     """
-    Utility method. Given a definitions file, returns a runnable that, when called, will generate a dataset definitions from a previous run's skims using ``skim_dir`` and ``task_name``
-
-    Args:
-        task_name (str): The task to load frim
-        defs_file (str): The definitions yaml file
-
-    Returns:
-        callable: A callable that requires ``skim_dir`` at runtime
+    Convert to ASCII. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
     """
-    return lambda skim_dir, **kwargs2: to_skimmed(
-        dataset, os.path.join(skim_dir, task_name)
+    value = str(value)
+    value = (
+        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
     )
-
-
-def load_from_pickle(task_name: str, **kwargs: dict):
-    """
-    Utility method. Given a definitions file, returns a runnable that, when called, will load a pickle from the given task's ``output_dir``
-
-    Args:
-        task_name (str): The task to load from
-
-    Returns:
-        callable: A callable that requires ``output_dir`` at runtime
-    """
-
-    def load_from_pickle_runtime(output_dir: str, **kwargs2: dict):
-        file_name = os.path.join(output_dir, f"{task_name}.pkl")
-        with open(file_name, "rb") as file:
-            return pickle.load(file)
-
-    return load_from_pickle_runtime
+    value = re.sub(r"[^\w\s-]", "", value.lower())
+    return re.sub(r"[-\s]+", "-", value).strip("-_")
