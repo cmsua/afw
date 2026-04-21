@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "afw"
-description = "Wrapper around Coffea and other tools"
+description = "Wrapper around CMS tools"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -39,10 +39,7 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-  "coffea>=2025.11.0",
-  "dask",
-  "dask-jobqueue",
-  "distributed"
+  "pyyaml"
 ]
 dynamic = ["version"]
 
@@ -58,10 +55,6 @@ dev = [
   "sphinx",
   "pydata-sphinx-theme",
   "pytest"
-]
-client = [
-  "pycurl",
-  "joblib"
 ]
 
 [tool.hatch]
